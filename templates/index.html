@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>VKSMM</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div style="margin: 10% auto; width: 600px;" class="row">
+		<table style="width: 100%;">
+			<tbody>
+				<tr>
+					<td>
+						<a href="{{ link }}" style="width: 200px;" class="btn btn-primary center-block" target="_blank">Войти через ВК</a><br>
+					</td>
+				</tr>								
+				{% if error %}
+				<tr>
+					<td>
+						<div class="alert alert-danger center-block" style="width: 200px;" role="alert" align="center">
+							<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							<b>{{ error }}</b>
+						</div>
+					</td>
+				</tr>
+				{% endif %}
+			</tbody>
+		</table>
+		<div class="panel panel-primary">
+			<div class="panel-body" style="text-align: center;">
+				{% if all_groups %}
+					<a href="{{ all_groups }}" target="_blank">Список всех групп</a>
+				{% else %}
+					Скоро станет доступен список всех зарегистрированных групп
+				{% endif %}
+			</div>
+		</div>
+    </div>
+
+</body>
+</html>
