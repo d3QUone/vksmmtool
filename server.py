@@ -1,5 +1,4 @@
-from flask import Flask, make_response, jsonify, request, g
-from flask import render_template, redirect, url_for
+from flask import Flask, render_template, url_for, make_response, redirect, jsonify, request, g
 from contextlib import closing
 import sqlite3
 import time
@@ -9,7 +8,7 @@ import os
 
 app = Flask(__name__)
 app.config.update(
-    DATABASE = 'base.db', #/root/vksmmtool/base.db
+    DATABASE = 'base.db',
     DEBUG = False
     #SERVER_NAME = "178.62.64.47:5000"
 )
@@ -18,14 +17,14 @@ def connect_db():
     return sqlite3.connect(app.config['DATABASE'])
 
 
-# run once from bash to setup tables
+# run once from bash to setup tables + add 'preload' values
 def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
     #db = connect_db()
-    #db.execute("insert into userinfo (username, password, status) values ('admin1', 'zxC_aQL2', 'ok')") #good
+    #db.execute("insert into userinfo (username, password, status) values ('admin1', 'zxC_aQL2', 'ok')")
     #db.commit()
 
 
@@ -41,7 +40,7 @@ def teardown_request(exception):
         db.close()
 
 
-# --------- VK SMM TOOLS ---------
+# --------- VK SMM TOOL ---------
 
 @app.route('/')
 @app.route('/vk', methods = ['GET'])
@@ -104,6 +103,7 @@ def parse_vk_responce():
                 g.db.commit()
         except Exception as e:
             print "/vk_login err:", e
+            return "error:" + str(e)
                 
         return redirect(url_for('personal_page', user_id = user_id, token = access_token))
     else:
@@ -223,16 +223,14 @@ def group_detail():
         return redirect(url_for("login_demo_page", error = "bad"))
 
 
-# --- V2 PROTOTYPES
+# --- V2 PROTOTYPES,    new design concept
 
-# new design concept 
-#                          --demo page with-OUT JS (YET)
+
 @app.route('/demo', methods = ['GET'])
 def show_demo_page():
     user_id = request.args.get('user_id')
     if user_id: #and type(user_id) is type(13) <-- add a checkup
-        print "user_id", user_id, "is connected, <type>:", type(user_id)
-        # new design template...
+        #print "user_id", user_id, "is connected"
         
         # load all groups
         groups = g.db.execute("select group_id from groups where user_id = " + str(user_id)).fetchall()
@@ -256,7 +254,6 @@ def show_demo_page():
                 offset = 0
             else:
                 offset = int(offset)
-            
 
             # way to get data for loaded group
             current_group_name = None
@@ -278,14 +275,23 @@ def show_demo_page():
 
             offset_next = None
             count_postinfo = g.db.execute("select count(*) from postinfo where group_id = " + str(group_id)).fetchall()[0][0]
-            #print "count_postinfo:", count_postinfo
             if 100*(offset + 1) < count_postinfo:
                 offset_next = offset + 1
                 offset_next = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_next)
-           
+
+            # finaly load stats
+            try:
+                f = open("statistics.txt", "r")
+                stats = json.loads(f.read())
+                f.close()
+            except:
+                # suddenly!
+                stats = None
+            
             return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, 
                                    current_group_name = current_group_name, current_group_picture = current_group_picture,
-                                   offset_prev = offset_prev, offset_next = offset_next)
+                                   offset_prev = offset_prev, offset_next = offset_next, count_postinfo = count_postinfo,
+                                   stats = stats)
         except Exception as e:
             return "Error: " + str(e)
     else:
