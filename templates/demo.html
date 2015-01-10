@@ -8,7 +8,7 @@
 <body>
 
 <div id="page">
-	<div id="acc-panel"><!-- all-groups-column -->
+	<div id="acc-panel"><!-- all groups -->
         {% if group_list %}
             {% for group in group_list %}
                 <a href="{{url_for('show_demo_page')}}?user_id={{user_id}}&group_id={{ group[0] }}">
@@ -45,14 +45,16 @@
             </div>
         </div>
         <br><!-- create buttons here -->
-        Навигация по группе
-        <br>
-        {% if offset_prev %}
-            <a href="{{ offset_prev }}">|||| previous posts ||||</a>
-        {% endif %}
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        {% if offset_next %}
-            <a href="{{ offset_next }}">|||| next posts ||||</a>
+        {% if offset_prev or offset_next %}
+            Навигация по группе
+            <br>
+            {% if offset_prev %}
+                <a href="{{ offset_prev }}">|||| previous posts ||||</a>
+            {% endif %}
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            {% if offset_next %}
+                <a href="{{ offset_next }}">|||| next posts ||||</a>
+            {% endif %}
         {% endif %}
         <hr>
     </div>
