@@ -25,7 +25,8 @@
     <div id="group-panel">
     	<div id="group-head"><!-- current group header -->
         	<img id="logo" src="{{ current_group_picture }}" alt="group logo"/>
-            <span>{{ current_group_name }} </span>
+            <span>{{ current_group_name }}</span>
+            &nbsp;&nbsp;&nbsp;&nbsp; всего {{ count_postinfo }} постов
         </div>
         <div id="group-content">
         	<div id="group-table"><!-- current posts -->
@@ -56,9 +57,18 @@
                 <a href="{{ offset_next }}">|||| next posts ||||</a>
             {% endif %}
         {% endif %}
-        <hr>
+        
+        <br><br><br><br><!-- I'll place stats here... -->
+        {% if stats %}
+            <u>Статистика скриптов:</u><br><br>
+            Последнее обновление: {{ stats['last_update'] }} <br>
+            Всего анализировано {{ stats['totalgroups'] }} групп <br>
+            Сумарное количество постов: {{ stats['totalposts'] }} <br>
+            Время полного обновления: {{ stats['time'] }}
+        {% else %}
+            Statistics-file was not found.
+        {% endif %}
     </div>
-    <br>
 </div>
 <p>&nbsp;</p>
 </body>
