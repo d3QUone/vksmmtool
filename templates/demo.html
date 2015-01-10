@@ -47,7 +47,20 @@
                 {% endif %}
             </div>
         </div>
-  </div>
+        <br>
+        <!-- create buttons here -->
+        Навигация по группе
+        <br>
+        {% if offset_prev %}
+            <a href="{{ offset_prev }}">|||| previous posts ||||</a>
+        {% endif %}
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        {% if offset_next %}
+            <a href="{{ offset_next }}">|||| next posts ||||</a>
+        {% endif %}
+        <hr>
+    </div>
+    <br>
 </div>
 <p>&nbsp;</p>
 </body>
