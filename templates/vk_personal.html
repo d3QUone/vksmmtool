@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'><title>{{ username }}</title></meta></head>
+<body>
+
+<meta charset='utf-8'>{{ username }}</meta>
+<br>
+<u>Топ 100 постов из ваших групп:</u>
+<hr>
+{% if group_list %}
+    {% for group in group_list %}
+        <meta charset='utf-8'><b>{{ group['name'] }}:</b></meta>
+        <br><br>
+        {% if posts[group['screen_name']] %}
+            / Likes / Link / Comments / Reposts
+            {% for apost in posts[group['screen_name']] %}
+                <br> |||
+                {{ apost[0] }} |||
+                <a href="{{ apost[1] }}" target="_blank">check</a> |||
+                {{ apost[2] }} |||
+                {{ apost[3] }} |||
+            {% endfor %}
+            <br><br><a href="{{ url_for('group_detail', group_id = group['id']) }}" target="_blank">подробнее о "{{ group['name'] }}"</a>
+        {% else %}
+            <meta charset='utf-8'>Группа закрыта или еще не проанализирована</meta>
+        {% endif %}
+        <hr>
+    {% endfor %}
+{% else %}
+    You are not signed to any groups
+{% endif %}
+
+
+{% if manual_groups %}
+    <br><br><hr>
+    <u>Группы, добавленные по ссылке:</u>
+    <br>
+    {% for group in manual_groups %}
+        <meta charset='utf-8'><b>{{ group['name'] }}:</b></meta>
+        <!--add form for >"Delete button" and add server methods...</form-->
+        <br><br>
+        {% if posts[group['screen_name']] %}
+            / Likes / Link / Comments / Reposts
+            {% for apost in posts[group['screen_name']] %}
+                <br> |||
+                {{ apost[0] }} |||
+                <a href="{{ apost[1] }}" target="_blank">check</a> |||
+                {{ apost[2] }} |||
+                {{ apost[3] }} |||
+            {% endfor %}
+            <br><br><a href="{{ url_for('group_detail', group_id = group['id']) }}" target="_blank">подробнее о "{{ group['name'] }}"</a>
+        {% else %}
+            <meta charset='utf-8'>Группа закрыта или еще не проанализирована</meta>
+        {% endif %}
+        <hr>
+    {% endfor %}
+{% else %}
+    У вас нет добавленных по ссылке групп.
+{% endif %}
+<!--br>
+<form action="/personal_page" method="POST">
+    Добавить группу:
+    <input type="text" name="link_to_group" placeholder="ссылка"/>
+    <input type="submit" value="добавить">
+    <input type="text" name="user_id" value="{{ user_id }}" hidden="true"/>
+    <input type="text" name="token" value="{{ token }}" hidden="true"/>
+    <br> Например: http://vk.com/designmdk
+</form>
+
+{% if add_error == 'bad' %}
+    <br><b>Некоррекный ввод</b>
+{% elif add_error == 'exist' %}
+    <br><b>Такая группа уже добавлена</b>
+{% endif %} -->
+
+<hr>
+{% if stats %}
+    <u>Статистика скриптов:</u><br><br>
+    Последнее обновление: {{ stats['last_update'] }} <br>
+    Всего анализировано {{ stats['totalgroups'] }} групп <br>
+    Сумарное количество постов: {{ stats['totalposts'] }} <br>
+    Время полного обновления: {{ stats['time'] }}
+{% else %}
+    Statistics-file was not found.
+{% endif %}
+
+<hr>
+
+</body>
+</html>
