@@ -8,8 +8,7 @@
 <body>
 
 <div id="page">
-	<div id="acc-panel">
-        <!-- all groups -->
+	<div id="acc-panel"><!-- all-groups-column -->
         {% if group_list %}
             {% for group in group_list %}
                 <a href="{{url_for('show_demo_page')}}?user_id={{user_id}}&group_id={{ group[0] }}">
@@ -24,14 +23,12 @@
         {% endif %}
     </div>
     <div id="group-panel">
-    	<div id="group-head">
-            <!-- current group header -->
+    	<div id="group-head"><!-- current group header -->
         	<img id="logo" src="{{ current_group_picture }}" alt="group logo"/>
             <span>{{ current_group_name }} </span>
         </div>
         <div id="group-content">
-        	<div id="group-table">
-                <!-- current posts -->
+        	<div id="group-table"><!-- current posts -->
                 {% if posts %}
                     {% for post in posts %}
                         <a href="{{ post[3] }}" target="_blank">
@@ -47,8 +44,7 @@
                 {% endif %}
             </div>
         </div>
-        <br>
-        <!-- create buttons here -->
+        <br><!-- create buttons here -->
         Навигация по группе
         <br>
         {% if offset_prev %}
