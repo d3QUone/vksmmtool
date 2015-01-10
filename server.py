@@ -223,8 +223,10 @@ def group_detail():
         return redirect(url_for("login_demo_page", error = "bad"))
 
 
+# --- V2 PROTOTYPES
+
 # new design concept 
-#                                       --demo page with-OUT JS (YET)
+#                          --demo page with-OUT JS (YET)
 @app.route('/demo', methods = ['GET'])
 def show_demo_page():
     user_id = request.args.get('user_id')
@@ -248,7 +250,15 @@ def show_demo_page():
             if group_id is None:
                 group_id = groups[0][0]
 
-            #!!! a gap (to load current group)
+            #count = 100 # not variable now
+            offset = request.args.get('offset') #1, 2, 3, etc 
+            if offset is None:
+                offset = 0
+            else:
+                offset = int(offset)
+            
+
+            # way to get data for loaded group
             current_group_name = None
             current_group_picture = None
             group_list = []
@@ -258,34 +268,35 @@ def show_demo_page():
                     current_group_name = name["name"]
                     current_group_picture = name["photo_medium"]
             
-            posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = " + str(group_id) + " order by like desc limit 100").fetchall()
+            posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = " + str(group_id) + " order by like desc limit 100 offset " + str(offset*100)).fetchall()
 
-            # + create buttons for navigations (if offset < 0 or count > len(all_posts): button = None
-            #                                                            posts on curr page (e.g. 99)
+            # buttons for navigation
+            offset_prev = None
+            if offset > 0:
+                offset_prev = offset - 1
+                offset_prev = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_prev)
+
+            offset_next = None
+            count_postinfo = g.db.execute("select count(*) from postinfo where group_id = " + str(group_id)).fetchall()[0][0]
+            #print "count_postinfo:", count_postinfo
+            if 100*(offset + 1) < count_postinfo:
+                offset_next = offset + 1
+                offset_next = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_next)
+           
             return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, 
-                                   current_group_name = current_group_name, current_group_picture = current_group_picture)
+                                   current_group_name = current_group_name, current_group_picture = current_group_picture,
+                                   offset_prev = offset_prev, offset_next = offset_next)
         except Exception as e:
             return "Error: " + str(e)
     else:
         return "sorry"
     
-'''
-# ajax endpoint
-@app.route('/update', methods = ['POST'])
-def update_page():
-    group_id = request.form['group_id']
-    offset = request.form['offset']
-    #....
-    res = {}
-    return jsonify(res)
-'''
-
 
 # --- ERRORS ---
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'code': 404, 'message': 'Page not found'}), 404)
+    return make_response(jsonify({'code': 404, 'message': 'Page not found', 'error': str(error)}), 404)
 
 
 if __name__ == '__main__':
