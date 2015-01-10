@@ -10,7 +10,15 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\templates <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\static <br>
 
-3) Fill them and run in 2 screens (for example)
+3) Fill them and setup DB vis bash:
+
+```bash
+python
+import server
+server.init_db()
+```
+
+4) Run in 2 screens (for example)
 
 <code>screen python vkparser.py</code>
 
