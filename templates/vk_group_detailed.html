@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'><title>{{ group_name }}</title></meta></head>
+<body>
+
+<meta charset='utf-8'><b>Подробнее о {{ group_name }}</b></meta>
+<br>
+
+{% if amount > 0 %}
+    Всего постов в группе: {{ amount }} <br>
+{% endif %}
+
+{% if post_list %}
+    <br> / Likes / Link / Comments / Reposts
+    {% for post in post_list %}
+        <br>
+        ||| {{ post[0] }} ||| <a href="{{ post[1] }}" target="_blank">check</a> ||| {{ post[2] }} ||| {{ post[3] }} |||
+    {% endfor %}
+{% else %}
+    <meta charset='utf-8'>Эта группа закрыта или ещё не анализирована</meta>
+{% endif %}
+
+<!--hr>
+<a href="{{ back_link }}">Вернуться назад</a-->
+
+</body>
+</html>
