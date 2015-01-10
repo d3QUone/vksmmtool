@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>VKSMM .2</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div id="page">
+	<div id="acc-panel">
+        <!-- all groups -->
+        {% if group_list %}
+            {% for group in group_list %}
+                <a href="{{url_for('show_demo_page')}}?user_id={{user_id}}&group_id={{ group[0] }}">
+                <img src="{{ group[2] }}" alt="group logo"/>
+                {{ group[1] }}
+                </a>
+                <br><br>
+            {% endfor %}
+        {% else %}
+            You have no groups :(
+            У вас нет групп :(
+        {% endif %}
+    </div>
+    <div id="group-panel">
+    	<div id="group-head">
+            <!-- current group header -->
+        	<img id="logo" src="{{ current_group_picture }}" alt="group logo"/>
+            <span>{{ current_group_name }} </span>
+        </div>
+        <div id="group-content">
+        	<div id="group-table">
+                <!-- current posts -->
+                {% if posts %}
+                    {% for post in posts %}
+                        <a href="{{ post[3] }}" target="_blank">
+                        <div class="ablock">
+                        {{ post[0] }} Likes<br>
+                        {{ post[1] }} Repo <br>
+                        {{ post[2] }} Comm
+                        </div>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    Группа закрыта или еще не проанализирована
+                {% endif %}
+            </div>
+        </div>
+  </div>
+</div>
+<p>&nbsp;</p>
+</body>
+</html>
