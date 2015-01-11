@@ -1,15 +1,17 @@
 @charset "utf-8";
 /* CSS Document */
-* {
-margin: 0;
+* { margin: 0;
 padding: 0;
 border: 0;
+font-family: tahoma,arial,verdana,sans-serif,Lucida Sans;
 }
 
+a { 
+    text-decoration: none;
+} 
 #page {
 	width: 1000px;
-	height: 600px;
-	background-color: #FFE7A0; 
+	height: 100%;
 	border: 1px solid #6E87B0;
 	margin: 0 auto;
 }
@@ -17,8 +19,56 @@ border: 0;
 #page #acc-panel {
 	width:200px;
 	height:100%;
+	min-height: 700px;
 	background-color: #7BC0FF;	
 	float: left;
+}
+
+#acc-panel #username
+{
+	width: 180px;
+	padding: 5px 10px;
+    font-size: 14px;
+	text-align: center;
+	border-bottom: 1px solid #6E87B0;
+}
+
+#acc-panel #gl {
+	width: 200px;
+	height: 570px;
+	overflow-y: auto;
+	border-bottom: 1px solid #6E87B0;
+	background-color: #93CBFF;
+}
+
+.gblock {
+    height: 60px;
+    margin: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gblock-pic {
+	width: 50px;
+	margin: 5px;
+	float: left;
+	display:block-inline;
+}
+
+.gtitle {
+	font: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
+	font-size: 14px;
+	color: #000000;
+}
+
+#acc-panel #stat {
+	margin: 0 5px;
+	height: 80px;
+	font-size: 10px;
+}
+
+#stat ul {
+	list-style:none;
 }
 
 #page #group-panel{
@@ -30,39 +80,102 @@ border: 0;
 
 #group-panel #group-head {
 	height: 80px;
-	background-color:#FFE7A0;
+	background-color:#EBEBEB;
 	padding: 10px;
 }
 
 #group-head span {
 	font: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
-	font-size: 30px;
-	padding-left: 20px;
+	font-size: 28px;
+	word-wrap:normal;
+}
+
+#group-head p {
+	font: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
+	font-size: 14px;
 }
 
 #group-head #logo {
 	float: left;
 	width: 80px;
 	height: 80px;
+	padding-right: 20px;
 }
 
 #group-panel #group-content {
-	margin: 25px;
-	height: 450px;
+	margin: 10px;
+	height: 580px;
 }
 
 
 #group-content #group-table {
-	height: 400px;
-	padding: 30px 0 0 18px;
+	height: 530px;
+	padding: 0px 0 0 15px;
 	overflow-y: auto;
 }
 
 .ablock {
-	height: 75px;
 	width: 75px;
-    /*background: url(https://gp6.googleusercontent.com/-yRiDN17Nh00/AAAAAAAAAAI/AAAAAAAAAAA/wJwpDGAkoq0/s48-c-k-no/photo.jpg) no-repeat center;*/
 	float: left;
-	margin: 5px;
-	border: 1px solid grey;
+	margin: 3px;
+	border: 1px solid #BCD2E3;
+    font-size: 11px;
+	color: #2B587A;
+}
+
+.ablock-pic {
+	height: 40px;
+	display:block;
+	margin: 5px auto;
+	max-width: 90%;
+}
+	
+.likes {
+	border-top: 1px solid #BCD2E3;
+}
+.likes-icon {
+	background: url("https://vk.com/images/icons/like.gif?2") no-repeat scroll 1px 0px transparent;
+	height: 10px;
+	margin: 2px 2px 0px;
+	padding-right: 1px;
+	opacity: 0.4;
+	width: 11px;
+    display: inline-block; 
+}
+
+.rep-icon {
+	background: url("https://vk.com/images/icons/like.gif?2") no-repeat scroll 1px 0px transparent;    
+	background-position: 0px -21px;
+	height: 10px;
+	margin: 2px 2px 0px;
+	padding-right: 1px;
+	opacity: 0.4;
+	width: 11px;
+    display: inline-block; 	
+}
+
+.coms-icon {
+	background: url("https://vk.com/images/icons/mono_iconset.png?1") no-repeat scroll 1px 0px;    
+	background-position: 0px -192px;
+	height: 10px;
+	margin: 2px 2px 0px;
+	padding-right: 1px;
+	opacity: 0.4;
+	width: 11px;
+    display: inline-block; 	
+
+}
+
+#nav-bottom 
+{
+	text-align:center;
+}
+
+#nav-bottom a {
+	display:inline-block;
+	background-color: #BCD2E3;
+	padding: 3px 6px;
+	margin: 0 10px;
+	color: #2B587A;
+	font-size: 14px;
 }
