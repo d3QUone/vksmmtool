@@ -67,9 +67,9 @@ def full_cycle():
     glob = 0
     for group_id in group_list:
         # delete old posts
-        save_into_db('delete from postinfo where group_id = ' + str(group_id))
+        save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
         
-        screen_name = get_out_db('select screen_name from groups where group_id = ' + str(group_id))[0][0]
+        screen_name = get_out_db('select screen_name from groups where group_id = {0}'.format(group_id))[0][0]
         #print "screen_name:", screen_name
         
         errors = 0
@@ -98,7 +98,7 @@ def full_cycle():
             
             for post in posts['items']:
                 try:            
-                    link = 'http://vk.com/'+screen_name+'?w=wall'+str(post['from_id']) + '_' + str(post['id'])
+                    link = 'http://vk.com/{0}?w=wall-{1}_{2}'.format(screen_name, group_id, post['id'])
                     try:
                         comm = post['comments']['count']
                     except:
@@ -115,13 +115,6 @@ def full_cycle():
                         picture = post['attachments'][0]['photo']['photo_130']
                     except:
                         picture = None
-                    '''
-                    # fuck utf8 and ascii
-                    try:
-                        content = post["text"]
-                    except:
-                        content = None
-                    '''
                         
                     save_into_db("insert into postinfo (group_id, link, like, comm, repo, picture) values ({0}, '{1}', {2}, {3}, {4}, '{5}')".format(group_id, link, like, comm, repo, picture))
                     glob += 1
@@ -129,10 +122,11 @@ def full_cycle():
                     print "link error: ", ex
             time.sleep(1)
     
-    # update statistics: no changes here :) 
+    # update statistics: no changes here :)
+    a = datetime.now()
     stat = open(os.getcwd() + '/statistics.txt', 'w')
-    stat.write(json.dumps({"totalgroups": str(len(group_list)), "totalposts": str(glob),
-                           "time": str(datetime.now() - t), "last_update": str(datetime.now())}))
+    stat.write(json.dumps({"totalgroups": "{0}".format(len(group_list)), "totalposts": "{0}".format(glob),
+                           "time": "{0}".format(datetime.now() - t), "last_update": "{0}:{1}".format(a.hour, a.minute)}))
     stat.close()
     
 
