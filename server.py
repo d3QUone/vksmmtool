@@ -79,7 +79,7 @@ def parse_vk_responce():
             access_token = res["access_token"]
 
             # delete old personal data first
-            g.db.execute("delete from userinfo where user_id = " + str(user_id))
+            g.db.execute("delete from userinfo where user_id = {0}".format(user_id))
             g.db.commit()
 
             # + save new (its faster:)
@@ -87,7 +87,7 @@ def parse_vk_responce():
             g.db.commit()
 
             # delete old groups
-            g.db.execute("delete from groups where user_id = " + str(user_id))
+            g.db.execute("delete from groups where user_id = {0}".format(user_id))
             g.db.commit()
             
             # load fresh groups from account; 
@@ -95,7 +95,7 @@ def parse_vk_responce():
             buf = requests.get(req).json()["response"]
             group_ids = ",".join(str(xi) for xi in buf)
             
-            req = "https://api.vk.com/method/groups.getById?group_ids=" + str(group_ids)
+            req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_ids)
             groups = requests.get(req).json()["response"]
 
             for item in groups:
@@ -103,10 +103,10 @@ def parse_vk_responce():
                 g.db.commit()
         except Exception as e:
             print "/vk_login err:", e
-            return "error:" + str(e)
+            return "error: {0}".format(e)
         return redirect(url_for('show_demo_page', user_id = user_id)) #'personal_page'
     else:
-        return "Something has gone wrong<br><a href=" + str(url_for('vk')) + ">go back to login page</a>"
+        return "Something has gone wrong<br><a href='{0}'>go back to login page</a>".format(url_for('vk'))
 
 
 # --- V2 PROTOTYPES,    new design concept
@@ -119,7 +119,7 @@ def show_demo_page():
         except:
             return "'user_id' error: int expected"
 
-        groups = g.db.execute("select group_id from groups where user_id = " + str(user_id)).fetchall()
+        groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
         group_ids = ""
         for group in groups:
             group_ids += str(group[0]) + ","
@@ -157,19 +157,19 @@ def show_demo_page():
                 current_group_picture = name["photo_medium"]
 
         #count = 100 - not variable now
-        posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = " + str(group_id) + " order by like desc limit 100 offset " + str(offset*100)).fetchall()
+        posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = {0} order by like desc limit 100 offset {1}".format(group_id, offset*100)).fetchall()
 
         # buttons for navigation
         offset_prev = None
         if offset > 0:
             offset_prev = offset - 1
-            offset_prev = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_prev)
+            offset_prev = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset_prev)
 
         offset_next = None
-        count_postinfo = g.db.execute("select count(*) from postinfo where group_id = " + str(group_id)).fetchall()[0][0]
+        count_postinfo = g.db.execute("select count(*) from postinfo where group_id = {0}".format(group_id)).fetchall()[0][0]
         if 100*(offset + 1) < count_postinfo:
             offset_next = offset + 1
-            offset_next = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_next)
+            offset_next = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset_next)
 
         # finaly load stats
         try:
@@ -240,13 +240,13 @@ def personal_page():
                     group_id = group_item[1]
                     screen_name = group_item[2]
 
-                    req = "https://api.vk.com/method/execute.group_name?access_token=" + token + "&id=" + str(group_id)
+                    req = "https://api.vk.com/method/execute.group_name?access_token=" + token + "&id={0}".format(group_id)
                     name = requests.get(req).json()["response"][0]
 
                     group_list.append({"name": name, "screen_name": screen_name, "id": group_id})
 
                     # SORTING HERE!
-                    content = g.db.execute("select like, link, comm, repo from postinfo where group_id = " + str(group_id) + " order by like desc").fetchall()
+                    content = g.db.execute("select like, link, comm, repo from postinfo where group_id = {0} order by like desc".format(group_id)).fetchall()
                     # ...[j] = [group_id, picture, content=None, link, like, comm, repo] -- full
                     # ...[j] = [like, link, comm, repo] -- now
                     length = len(content)
@@ -263,7 +263,7 @@ def personal_page():
                     print "loading err: ", ex, ", group:", screen_name
             try:
                 # load actual username
-                req = "https://api.vk.com/method/execute.name_pic?access_token=" + token + "&id=" + str(user_id)
+                req = "https://api.vk.com/method/execute.name_pic?access_token=" + token + "&id={0}".format(user_id)
                 username = requests.get(req).json()["response"]["name"] # ["picture"] -- avatar 100px
                         
                 # load work stats
@@ -285,12 +285,12 @@ def group_detail():
     group_id = request.args.get("group_id")
     if group_id:
         try:
-            req = "https://api.vk.com/method/groups.getById?group_id=" + str(group_id)
+            req = "https://api.vk.com/method/groups.getById?group_id={0}".format(group_id)
             name = requests.get(req).json()["response"][0]["name"]
             #print "name:", name
 
             # + sorting
-            posts = g.db.execute("select like, link, comm, repo from postinfo where group_id = " + str(group_id) + " order by like desc").fetchall()
+            posts = g.db.execute("select like, link, comm, repo from postinfo where group_id = {0} order by like desc".format(group_id)).fetchall()
             #                 0        1        2      3     4      5     6
             # posts[j] = [group_id, picture, content, link, like, comm, repo]  <-- if *
             return render_template("vk_group_detailed.html", group_name = name,
