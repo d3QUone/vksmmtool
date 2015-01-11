@@ -49,8 +49,11 @@
                 {% if posts %}
                     {% for post in posts %}
 					<a href="{{ post[3] }}" target="_blank"><div class="ablock">
-                        
-                    	<img class="ablock-pic" src="{{ post[4] }}"/>
+                        {% if post[4] == 'None' %}
+                            <img class="ablock-pic" src="{{ url_for('static', filename='none.png') }}"/>
+                        {% else %}
+                            <img class="ablock-pic" src="{{ post[4] }}"/>
+                        {% endif %}
 						<div class="likes">
 							<span class="likes-icon"></span>
 							{{ post[0] }}
