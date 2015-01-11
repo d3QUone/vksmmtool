@@ -104,7 +104,7 @@ def parse_vk_responce():
         except Exception as e:
             print "/vk_login err:", e
             return "error: {0}".format(e)
-        return redirect(url_for('show_demo_page', user_id = user_id)) #'personal_page'
+        return redirect(url_for('show_demo_page', user_id = user_id, access_token = access_token))
     else:
         return "Something has gone wrong<br><a href='{0}'>go back to login page</a>".format(url_for('vk'))
 
@@ -113,7 +113,8 @@ def parse_vk_responce():
 @app.route('/demo', methods = ['GET'])
 def show_demo_page():
     user_id = request.args.get('user_id')
-    if user_id:
+    access_token = request.args.get('access_token')
+    if user_id and access_token:
         try:
             user_id = int(user_id)
         except:
@@ -155,17 +156,25 @@ def show_demo_page():
                 current_group_name = name["name"]
                 current_group_picture = name["photo_medium"]
 
-        posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = {0} order by like desc limit {1} offset {2}".format(group_id, 100, offset*100)).fetchall()
+        count = 45
+        posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by like desc limit {1} offset {2}".format(group_id, count, offset*count)).fetchall()
 
         # buttons for navigation
         offset_prev = None
         if offset > 0: 
-            offset_prev = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset - 1)
+            offset_prev = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset - 1)
 
         offset_next = None
         count_postinfo = g.db.execute("select count(*) from postinfo where group_id = {0}".format(group_id)).fetchall()[0][0]
-        if 100*(offset + 1) < count_postinfo:
-            offset_next = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset + 1)
+        if count*(offset + 1) < count_postinfo:
+            offset_next = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset + 1)
+
+        # load actual username
+        try:
+            req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
+            user_name = requests.get(req).json()["response"]["name"] #["picture"] -- avatar 100px
+        except:
+            user_name = " "
 
         # finaly load stats
         try:
@@ -175,10 +184,10 @@ def show_demo_page():
         except:
             stats = None
         
-        return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, 
+        return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
                                current_group_name = current_group_name, current_group_picture = current_group_picture,
                                offset_prev = offset_prev, offset_next = offset_next, count_postinfo = count_postinfo,
-                               stats = stats)
+                               user_name = user_name, stats = stats)
     else:
         return "'user_id' expected"
 
