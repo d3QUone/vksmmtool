@@ -97,10 +97,10 @@ def parse_vk_responce():
             
             req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_ids)
             groups = requests.get(req).json()["response"]
-
             for item in groups:
                 g.db.execute("insert into groups (user_id, group_id, screen_name, picture) values ({0}, {1}, '{2}', '{3}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"]))
                 g.db.commit()
+                
         except Exception as e:
             print "/vk_login err:", e
             return "error: {0}".format(e)
@@ -120,13 +120,11 @@ def show_demo_page():
             return "'user_id' error: int expected"
 
         groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
-        group_ids = ""
-        for group in groups:
-            group_ids += str(group[0]) + ","
+        group_ids = ",".join("{0}".format(group[0]) for group in groups)
 
         req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
         names = requests.get(req).json()["response"]
-        # len(names) == len(groups) 
+        # len(names) == len(groups)
         
         group_id = request.args.get('group_id')
         if group_id is None:
@@ -150,26 +148,24 @@ def show_demo_page():
         current_group_name = None
         current_group_picture = None
         group_list = []
+        append = group_list.append
         for name in names:
-            group_list.append([name["gid"], name["name"], name["photo_medium"]])
+            append([name["gid"], name["name"], name["photo_medium"]])
             if str(name["gid"]) == str(group_id):
                 current_group_name = name["name"]
                 current_group_picture = name["photo_medium"]
 
-        #count = 100 - not variable now
-        posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = {0} order by like desc limit 100 offset {1}".format(group_id, offset*100)).fetchall()
+        posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = {0} order by like desc limit {1} offset {2}".format(group_id, 100, offset*100)).fetchall()
 
         # buttons for navigation
         offset_prev = None
-        if offset > 0:
-            offset_prev = offset - 1
-            offset_prev = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset_prev)
+        if offset > 0: 
+            offset_prev = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset - 1)
 
         offset_next = None
         count_postinfo = g.db.execute("select count(*) from postinfo where group_id = {0}".format(group_id)).fetchall()[0][0]
         if 100*(offset + 1) < count_postinfo:
-            offset_next = offset + 1
-            offset_next = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset_next)
+            offset_next = url_for('show_demo_page') + "?user_id={0}&group_id={1}&offset={2}".format(user_id, group_id, offset + 1)
 
         # finaly load stats
         try:
@@ -255,8 +251,9 @@ def personal_page():
                     else:
                         i = 0
                         buf = []
+                        append = buf.append
                         while i < 100:
-                            buf.append(content[i])
+                            append(content[i])
                             i += 1
                         posts[screen_name] = buf
                 except Exception as ex:
