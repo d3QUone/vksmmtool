@@ -41,7 +41,7 @@ def teardown_request(exception):
 
 
 # --------- VK SMM TOOL ---------
-
+# login -- OK
 @app.route('/')
 @app.route('/vk', methods = ['GET'])
 def login_demo_page():
@@ -57,7 +57,7 @@ def login_demo_page():
     return render_template('index.html', link = link, error = error)
 
 
-# vk auth module
+# vk auth module -- OK
 @app.route('/vk_login', methods = ['GET'])
 def parse_vk_responce():
     code = request.args.get('code')
@@ -104,13 +104,92 @@ def parse_vk_responce():
         except Exception as e:
             print "/vk_login err:", e
             return "error:" + str(e)
-                
-        return redirect(url_for('personal_page', user_id = user_id, token = access_token))
+        return redirect(url_for('show_demo_page', user_id = user_id)) #'personal_page'
     else:
         return "Something has gone wrong<br><a href=" + str(url_for('vk')) + ">go back to login page</a>"
 
 
-# vk personal page render
+# --- V2 PROTOTYPES,    new design concept
+@app.route('/demo', methods = ['GET'])
+def show_demo_page():
+    user_id = request.args.get('user_id')
+    if user_id:
+        try:
+            user_id = int(user_id)
+        except:
+            return "'user_id' error: int expected"
+
+        groups = g.db.execute("select group_id from groups where user_id = " + str(user_id)).fetchall()
+        group_ids = ""
+        for group in groups:
+            group_ids += str(group[0]) + ","
+
+        req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
+        names = requests.get(req).json()["response"]
+        # len(names) == len(groups) 
+        
+        group_id = request.args.get('group_id')
+        if group_id is None:
+            group_id = groups[0][0]
+        else:
+            try:
+                group_id = int(group_id)
+            except:
+                return "'group_id' error: int expected"
+
+        offset = request.args.get('offset') #1, 2, 3, etc 
+        if offset is None:
+            offset = 0
+        else:
+            try:
+                offset = int(offset)
+            except:
+                return "'offset' error: int expected"
+
+        # way to get data for loaded group
+        current_group_name = None
+        current_group_picture = None
+        group_list = []
+        for name in names:
+            group_list.append([name["gid"], name["name"], name["photo_medium"]])
+            if str(name["gid"]) == str(group_id):
+                current_group_name = name["name"]
+                current_group_picture = name["photo_medium"]
+
+        #count = 100 - not variable now
+        posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = " + str(group_id) + " order by like desc limit 100 offset " + str(offset*100)).fetchall()
+
+        # buttons for navigation
+        offset_prev = None
+        if offset > 0:
+            offset_prev = offset - 1
+            offset_prev = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_prev)
+
+        offset_next = None
+        count_postinfo = g.db.execute("select count(*) from postinfo where group_id = " + str(group_id)).fetchall()[0][0]
+        if 100*(offset + 1) < count_postinfo:
+            offset_next = offset + 1
+            offset_next = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_next)
+
+        # finaly load stats
+        try:
+            f = open("statistics.txt", "r")
+            stats = json.loads(f.read())
+            f.close()
+        except:
+            stats = None
+        
+        return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, 
+                               current_group_name = current_group_name, current_group_picture = current_group_picture,
+                               offset_prev = offset_prev, offset_next = offset_next, count_postinfo = count_postinfo,
+                               stats = stats)
+    else:
+        return "'user_id' expected"
+
+
+# ---- OLD ------
+
+# vk personal page render (OLD VER)
 @app.route('/personal_page', methods = ['GET', 'POST'])
 def personal_page():
     if request.method == 'GET':
@@ -129,6 +208,7 @@ def personal_page():
             add_error = None
             '''
             # do I really need to add groups manually ???
+            # will add this as premium feature !
             
             if request.method == 'POST':
                 # add group from page-form
@@ -151,7 +231,6 @@ def personal_page():
                     print "post err:", str(e)
                     add_error = "bad"
             '''
-            
             all_groups = g.db.execute("select * from groups where user_id = " + str(user_id)).fetchall()
             # ...[j] = [user_id, group_ip, screen_name, picture]
             posts = {}
@@ -200,7 +279,7 @@ def personal_page():
     return redirect(url_for('login_demo_page', error = "bad"))
 
 
-# detailed content of group (all posts + current stats)
+# detailed content of group (all posts + current stats) OLD VER
 @app.route("/detail", methods = ["GET"])
 def group_detail():
     group_id = request.args.get("group_id")
@@ -221,81 +300,6 @@ def group_detail():
             return "Sorry, something wrong... "
     else:
         return redirect(url_for("login_demo_page", error = "bad"))
-
-
-# --- V2 PROTOTYPES,    new design concept
-
-
-@app.route('/demo', methods = ['GET'])
-def show_demo_page():
-    user_id = request.args.get('user_id')
-    if user_id: #and type(user_id) is type(13) <-- add a checkup
-        #print "user_id", user_id, "is connected"
-        
-        # load all groups
-        groups = g.db.execute("select group_id from groups where user_id = " + str(user_id)).fetchall()
-        group_ids = ""
-        for group in groups:
-            group_ids += str(group[0]) + ","
-
-        # still in debug    
-        try:
-            req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
-            names = requests.get(req).json()["response"]
-
-            # load offset=0, count=100 from first group_id
-            group_id = request.args.get('group_id') # heetriy method
-            if group_id is None:
-                group_id = groups[0][0]
-
-            #count = 100 # not variable now
-            offset = request.args.get('offset') #1, 2, 3, etc 
-            if offset is None:
-                offset = 0
-            else:
-                offset = int(offset)
-
-            # way to get data for loaded group
-            current_group_name = None
-            current_group_picture = None
-            group_list = []
-            for name in names:
-                group_list.append([name["gid"], name["name"], name["photo_medium"]])
-                if str(name["gid"]) == str(group_id):
-                    current_group_name = name["name"]
-                    current_group_picture = name["photo_medium"]
-            
-            posts = g.db.execute("select like, repo, comm, link from postinfo where group_id = " + str(group_id) + " order by like desc limit 100 offset " + str(offset*100)).fetchall()
-
-            # buttons for navigation
-            offset_prev = None
-            if offset > 0:
-                offset_prev = offset - 1
-                offset_prev = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_prev)
-
-            offset_next = None
-            count_postinfo = g.db.execute("select count(*) from postinfo where group_id = " + str(group_id)).fetchall()[0][0]
-            if 100*(offset + 1) < count_postinfo:
-                offset_next = offset + 1
-                offset_next = url_for('show_demo_page') + "?user_id=" + str(user_id) + "&group_id=" + str(group_id) + "&offset=" + str(offset_next)
-
-            # finaly load stats
-            try:
-                f = open("statistics.txt", "r")
-                stats = json.loads(f.read())
-                f.close()
-            except:
-                # suddenly!
-                stats = None
-            
-            return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, 
-                                   current_group_name = current_group_name, current_group_picture = current_group_picture,
-                                   offset_prev = offset_prev, offset_next = offset_next, count_postinfo = count_postinfo,
-                                   stats = stats)
-        except Exception as e:
-            return "Error: " + str(e)
-    else:
-        return "sorry"
     
 
 # --- ERRORS ---
