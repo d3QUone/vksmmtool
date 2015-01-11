@@ -2,74 +2,88 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>VKSMM .2</title>
+<title>VKSMM</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
 
+<body>
 <div id="page">
-	<div id="acc-panel"><!-- all groups -->
-        {% if group_list %}
-            {% for group in group_list %}
-                <a href="{{url_for('show_demo_page')}}?user_id={{user_id}}&group_id={{ group[0] }}">
-                <img src="{{ group[2] }}" alt="group logo"/>
-                {{ group[1] }}
-                </a>
-                <br><br>
-            {% endfor %}
+	<div id="acc-panel">
+        <div id="username"><b>{{ user_name }}</b></div>
+        <div id="gl"><!-- all groups -->
+			{% if group_list %}
+				{% for group in group_list %}
+					<a href="{{url_for('show_demo_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ group[0] }}">
+                    <div class="gblock">
+					<img class="gblock-pic" src="{{ group[2] }}" alt="group logo"/>
+					<div class="gtitle">{{ group[1] }}</div>
+                    </div>
+					</a>
+				{% endfor %}
+			{% else %}
+				You have no groups :(
+				У вас нет групп :(
+			{% endif %}
+        </div>
+        <div id="stat"><!-- I'll place stats here... -->
+        {% if stats %}
+            <ul>
+                <li>Последнее обновление: {{ stats['last_update'] }}</li>
+                <li>Всего анализировано {{ stats['totalgroups'] }}</li>
+                <li>Сумарное количество постов: {{ stats['totalposts'] }}</li>
+                <li>Время полного обновления: {{ stats['time'] }}</li>
+            </ul>
         {% else %}
-            You have no groups :(
-            У вас нет групп :(
+            Statistics-file was not found.
         {% endif %}
+        </div>
     </div>
     <div id="group-panel">
     	<div id="group-head"><!-- current group header -->
         	<img id="logo" src="{{ current_group_picture }}" alt="group logo"/>
             <span>{{ current_group_name }}</span>
-            &nbsp;&nbsp;&nbsp;&nbsp; всего {{ count_postinfo }} постов
+            <p>Всего постов: {{ count_postinfo }}</p> 
         </div>
         <div id="group-content">
         	<div id="group-table"><!-- current posts -->
                 {% if posts %}
                     {% for post in posts %}
-                        <a href="{{ post[3] }}" target="_blank">
-                        <div class="ablock">
-                        {{ post[0] }} Likes<br>
-                        {{ post[1] }} Repo <br>
-                        {{ post[2] }} Comm
-                        </div>
-                        </a>
+					<a href="{{ post[3] }}" target="_blank"><div class="ablock">
+                        
+                    	<img class="ablock-pic" src="{{ post[4] }}"/>
+						<div class="likes">
+							<span class="likes-icon"></span>
+							{{ post[0] }}
+						</div>
+						<div class="rep">
+							<span class="rep-icon"></span>
+							{{ post[1] }}
+						</div>
+						<div class="coms">
+							<span class="coms-icon"></span>
+							{{ post[2] }}
+						</div>
+					</div>
+					</a>
                     {% endfor %}
                 {% else %}
                     Группа закрыта или еще не проанализирована
                 {% endif %}
             </div>
+			<div id="nav-bottom"><!-- create buttons here -->
+			{% if offset_prev or offset_next %}
+				Навигация по группе
+				<br>
+				{% if offset_prev %}
+					<a href="{{ offset_prev }}">Назад</a>
+				{% endif %}
+				{% if offset_next %}
+					<a href="{{ offset_next }}">Вперёд</a>
+				{% endif %}
+			{% endif %}
+			</div>
         </div>
-        <br><!-- create buttons here -->
-        {% if offset_prev or offset_next %}
-            Навигация по группе
-            <br>
-            {% if offset_prev %}
-                <a href="{{ offset_prev }}">|||| previous posts ||||</a>
-            {% endif %}
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            {% if offset_next %}
-                <a href="{{ offset_next }}">|||| next posts ||||</a>
-            {% endif %}
-        {% endif %}
-        
-        <br><br><br><br><!-- I'll place stats here... -->
-        {% if stats %}
-            <u>Статистика скриптов:</u><br><br>
-            Последнее обновление: {{ stats['last_update'] }} <br>
-            Всего анализировано {{ stats['totalgroups'] }} групп <br>
-            Сумарное количество постов: {{ stats['totalposts'] }} <br>
-            Время полного обновления: {{ stats['time'] }}
-        {% else %}
-            Statistics-file was not found.
-        {% endif %}
-    </div>
+  </div>
 </div>
-<p>&nbsp;</p>
 </body>
 </html>
