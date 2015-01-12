@@ -124,9 +124,11 @@ def full_cycle():
     
     # update statistics: no changes here :)
     a = datetime.now()
+    dt = "{0}".format(a - t)
+    dt = dt.split(".")[0]
     stat = open(os.getcwd() + '/statistics.txt', 'w')
     stat.write(json.dumps({"totalgroups": "{0}".format(len(group_list)), "totalposts": "{0}".format(glob),
-                           "time": "{0}".format(datetime.now() - t), "last_update": "{0}:{1}".format(a.hour, a.minute)}))
+                           "time": dt, "last_update": "{0}:{1}".format(a.hour, a.minute)}))
     stat.close()
     
 
