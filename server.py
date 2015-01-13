@@ -1,8 +1,9 @@
 from flask import Flask, render_template, url_for, make_response, redirect, jsonify, request, g
 from contextlib import closing
-import sqlite3
+from datetime import datetime
 import time
 import requests
+import sqlite3
 import json
 import os
 
@@ -78,12 +79,22 @@ def parse_vk_responce():
             user_id = res["user_id"]
             access_token = res["access_token"]
 
+            # load old sorting ...
+            res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
+            try:
+                print sort_type
+                sort_type = res[0][0]
+                if sort_type not in ['like', 'repo', 'comm']:
+                    sort_type = 'like'
+            except:
+                sort_type = 'like'
+
             # delete old personal data first
             g.db.execute("delete from userinfo where user_id = {0}".format(user_id))
             g.db.commit()
 
             # + save new (its faster:)
-            g.db.execute("insert into userinfo (user_id, auth_token) values ({0}, '{1}')".format(int(user_id), access_token))
+            g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen) values ({0}, '{1}', '{2}', '{3}')".format(int(user_id), access_token, sort_type, datetime.now()))
             g.db.commit()
 
             # delete old groups
@@ -109,95 +120,104 @@ def parse_vk_responce():
         return "Something has gone wrong<br><a href='{0}'>go back to login page</a>".format(url_for('vk'))
 
 
-# --- V2 PROTOTYPES,    new design concept
+# main page
 @app.route('/demo', methods = ['GET'])
 def show_demo_page():
-    user_id = request.args.get('user_id')
     access_token = request.args.get('access_token')
+    user_id = request.args.get('user_id')
+    try:
+        user_id = int(user_id)
+    except:
+        return "'user_id' error: int expected"
+    # + additional parameters
+    group_id = request.args.get('group_id')
+    offset = request.args.get('offset')
+    sort_type = request.args.get('sort_type')
+                                   
     if user_id and access_token:
         try:
-            user_id = int(user_id)
-        except:
-            return "'user_id' error: int expected"
+            groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
+            group_ids = ",".join("{0}".format(group[0]) for group in groups)
+            req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
+            names = requests.get(req).json()["response"]
 
-        groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
-        group_ids = ",".join("{0}".format(group[0]) for group in groups)
-
-        req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
-        names = requests.get(req).json()["response"]
-        # len(names) == len(groups)
-        
-        group_id = request.args.get('group_id')
-        if group_id is None:
-            group_id = groups[0][0]
-        else:
             try:
                 group_id = int(group_id)
             except:
-                return "'group_id' error: int expected"
+                group_id = groups[0][0]
 
-        offset = request.args.get('offset') #1, 2, 3, etc 
-        if offset is None:
-            offset = 0
-        else:
+            # way to get data for loaded group
+            current_group_name = None
+            current_group_picture = None
+            group_list = []
+            append = group_list.append
+            for name in names:
+                append([name["gid"], name["name"], name["photo_medium"]])
+                if str(name["gid"]) == str(group_id):
+                    current_group_name = name["name"]
+                    current_group_picture = name["photo_medium"]
+
+            # UPDATE SORTING
+            if sort_type in ['like', 'repo', 'comm']:
+                g.db.execute("update userinfo set sort_type = '{0}' where user_id = {1}".format(sort_type, user_id))
+                g.db.commit()
+            else:
+                res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
+                sort_type = res[0][0]
+
             try:
                 offset = int(offset)
             except:
-                return "'offset' error: int expected"
+                offset = 0
+            count = 45                                                                                          
+            posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by {1} desc limit {2} offset {3}".format(group_id, sort_type, count, offset*count)).fetchall()
+            
+            # buttons for navigation
+            offset_prev = None
+            if offset > 0: 
+                offset_prev = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset - 1)
 
-        # way to get data for loaded group
-        current_group_name = None
-        current_group_picture = None
-        group_list = []
-        append = group_list.append
-        for name in names:
-            append([name["gid"], name["name"], name["photo_medium"]])
-            if str(name["gid"]) == str(group_id):
-                current_group_name = name["name"]
-                current_group_picture = name["photo_medium"]
+            offset_next = None
+            count_postinfo = g.db.execute("select count(*) from postinfo where group_id = {0}".format(group_id)).fetchall()[0][0]
+            if count*(offset + 1) < count_postinfo:
+                offset_next = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset + 1)
 
-        count = 45
-        posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by like desc limit {1} offset {2}".format(group_id, count, offset*count)).fetchall()
+            # prepare change-sort links
+            base_link = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}&sort_type=".format(user_id, access_token, group_id, offset)
 
-        # buttons for navigation
-        offset_prev = None
-        if offset > 0: 
-            offset_prev = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset - 1)
+            # load actual username
+            try:
+                req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
+                user_name = requests.get(req).json()["response"]["name"] #["picture"] -- avatar 100px
+            except:
+                user_name = " "
 
-        offset_next = None
-        count_postinfo = g.db.execute("select count(*) from postinfo where group_id = {0}".format(group_id)).fetchall()[0][0]
-        if count*(offset + 1) < count_postinfo:
-            offset_next = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset + 1)
+            # finaly load stats
+            try:
+                f = open("statistics.txt", "r")
+                stats = json.loads(f.read())
+                f.close()
+            except:
+                stats = None
 
-        # load actual username
-        try:
-            req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
-            user_name = requests.get(req).json()["response"]["name"] #["picture"] -- avatar 100px
-        except:
-            user_name = " "
-
-        # finaly load stats
-        try:
-            f = open("statistics.txt", "r")
-            stats = json.loads(f.read())
-            f.close()
-        except:
-            stats = None
-        
-        return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
-                               current_group_name = current_group_name, current_group_picture = current_group_picture,
-                               offset_prev = offset_prev, offset_next = offset_next, count_postinfo = count_postinfo,
-                               user_name = user_name, stats = stats)
+            # !!! save last_seen val ? what if it will stay in login only
+            
+            return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
+                                   current_group_name = current_group_name, current_group_picture = current_group_picture,
+                                   offset_prev = offset_prev, offset_next = offset_next, offset = offset, count_postinfo = count_postinfo,
+                                   user_name = user_name, stats = stats, base_link = base_link, sort_type = sort_type, group_id = group_id)
+        except Exception as e:
+            return "Exception: {0}".format(e)
     else:
-        return "'user_id' expected"
+        return "'user_id' and 'access_token' were expected"
 
 
-# ---- OLD ------
+# ------ OLD ------
 
 # vk personal page render (OLD VER)
 @app.route('/personal_page', methods = ['GET', 'POST'])
 def personal_page():
-    if request.method == 'GET':
+    if request.method is 'GET':
         user_id = request.args.get("user_id")
         token = request.args.get("token")
     else:
