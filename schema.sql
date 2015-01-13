@@ -2,7 +2,9 @@ drop table if exists userinfo;
 create table userinfo (
   user_id integer not null,
   picture text,
-  auth_token text
+  auth_token text,
+  last_seen text,
+  sort_type text
 );
 drop table if exists groups;
 create table groups (
