@@ -21,12 +21,10 @@ import server
 server.init_db()
 ```
 
-4) Run in 2 screens (for example)
+4) Run it in 2 screens (for example)
 
 <code>screen python vkparser.py</code>
 
 <code>screen python server.py</code>
 <hr>
-<b>Try pre-release version</b> (Vkontakte-account is required):
-
-<a href="http://178.62.64.47:5000/" target="_blank">Actual version</a>
+<a href="http://178.62.64.47:5000/" target="_blank"><b>Try pre-release version</b></a> (Vkontakte-account is required)
