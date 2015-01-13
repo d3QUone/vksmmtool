@@ -84,7 +84,13 @@
 					<a href="{{ offset_next }}">Вперёд</a>
 				{% endif %}
 			{% endif %}
-			</div>
+            
+            <br><!-- try sorting, sort_type is needed for animation (diff button pics) -->
+            active sort <b>by {{ sort_type }}</b>
+            <a href="{{ base_link }}like">by likes</a>
+            <a href="{{ base_link }}comm">by comments</a>
+            <a href="{{ base_link }}repo">by reposts</a>
+		</div>
         </div>
   </div>
 </div>
