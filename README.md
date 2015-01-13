@@ -10,6 +10,9 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\templates <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\static <br>
 
+Don't forget to add graphic files to "static" folder:<br>
+"none.png"
+
 3) Fill them and setup DB vis bash:
 
 ```bash
@@ -24,8 +27,6 @@ server.init_db()
 
 <code>screen python server.py</code>
 <hr>
-<b>Try alfa versions</b> (Vkontakte account is required):
+<b>Try pre-release version</b> (Vkontakte-account is required):
 
-1) <a href="http://178.62.64.47:5000/" target="_blank">first version</a>
-
-2) <a href="http://178.62.64.47:5000/demo?user_id=51758590" target="_blank">second version</a>
+<a href="http://178.62.64.47:5000/" target="_blank">Actual version</a>
