@@ -159,9 +159,10 @@ def show_demo_page():
 
             # UPDATE SORTING
             if sort_type in ['like', 'repo', 'comm']:
-                g.db.execute("update userinfo set sort_type = '{0}' where user_id = {1}".format(sort_type, user_id))
+                g.db.execute("update userinfo set sort_type = '{0}', last_seen = '{1}' where user_id = {2}".format(sort_type, datetime.now(), user_id))
                 g.db.commit()
             else:
+                g.db.execute("update userinfo set last_seen = '{0}' where user_id = {1}".format(datetime.now(), user_id))
                 res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
                 sort_type = res[0][0]
 
