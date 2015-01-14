@@ -29,9 +29,9 @@
         {% if stats %}
             <ul>
                 <li>Последнее обновление: {{ stats['last_update'] }}</li>
-                <li>Всего анализировано {{ stats['totalgroups'] }}</li>
-                <li>Сумарное количество постов: {{ stats['totalposts'] }}</li>
-                <li>Время полного обновления: {{ stats['time'] }}</li>
+                <li>Продолжительность: {{ stats['time'] }}</li>
+                <li>Всего анализировано {{ stats['totalgroups'] }} групп(ы)</li>
+                <li>Всего постов: {{ stats['totalposts'] }}</li>
             </ul>
         {% else %}
             Statistics-file was not found.
@@ -90,7 +90,7 @@
             <a href="{{ base_link }}like">by likes</a>
             <a href="{{ base_link }}comm">by comments</a>
             <a href="{{ base_link }}repo">by reposts</a>
-		</div>
+	</div>
         </div>
   </div>
 </div>
