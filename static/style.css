@@ -10,172 +10,262 @@ a {
     text-decoration: none;
 } 
 #page {
-	width: 1000px;
-	height: 100%;
-	border: 1px solid #6E87B0;
+    height: 950px;
+    width: 1024px;
 	margin: 0 auto;
+    -webkit-box-shadow: 0px 1px 2px 0px rgba(50, 50, 50, 0.46);
+    -moz-box-shadow:    0px 1px 2px 0px rgba(50, 50, 50, 0.46);
+    box-shadow:         0px 1px 2px 0px rgba(50, 50, 50, 0.46);
 }
 
 #page #acc-panel {
-	width:200px;
-	height:100%;
-	min-height: 700px;
-	background-color: #7BC0FF;	
-	float: left;
+	width: 235px;
+    height: 950px;
+    background-color: #42658b;
+    float: left;
 }
 
-#acc-panel #username
+#acc-panel #userblock
 {
-	width: 180px;
-	padding: 5px 10px;
-    font-size: 14px;
-	text-align: center;
-	border-bottom: 1px solid #6E87B0;
+	height: 40px;
+    font: 700 12px / 22px Tahoma;
+}
+
+#userblock #ava {
+    height: 40px;
+    width: 40px;
+    display: block-inline;
+    float: left;
+}
+
+#userblock span {
+    display: block-inline;
+    padding: 50px 0 0 14px;
+    height: 40px;
+    line-height: 40px;
+    color: #e8eff7;
+    
 }
 
 #acc-panel #gl {
-	width: 200px;
-	height: 570px;
+	width: 235px;
+	height: 850px;
 	overflow-y: auto;
-	border-bottom: 1px solid #6E87B0;
-	background-color: #93CBFF;
+    background-color: #4f7195;
 }
 
 .gblock {
-    height: 60px;
-    margin: 5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+	height: 30px;	
+	padding: 3px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.gblock:hover {
+	background-color: #42658B;
+}
+
+.gblock-selected {
+	background-color: #42658B;
 }
 
 .gblock-pic {
-	width: 50px;
-	margin: 5px;
+	width: 20px;
+    height: 20px;
+	padding: 5px;
 	float: left;
 	display:block-inline;
 }
 
 .gtitle {
-	font: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
-	font-size: 14px;
-	color: #000000;
+	font: 700 11px / 13px Tahoma;
+    color: #e8eff7;
+    padding-right: 15px;
 }
 
 #acc-panel #stat {
-	margin: 0 5px;
-	height: 80px;
-	font-size: 10px;
+    background-color: #42658b;
+    width: 235px;
+    font: 700 10px / 13px Tahoma;
+    color: #e8eff7;
 }
 
 #stat ul {
 	list-style:none;
+    margin: 3px 19px;
 }
 
 #page #group-panel{
-	width: 800px;
+	width: 789px;
 	height: 100%;
 	background-color: #FFFFFC;
-	margin-left: 200px;
+	margin-left: 235px;
 }
 
 #group-panel #group-head {
-	height: 80px;
-	background-color:#EBEBEB;
-	padding: 10px;
+	height: 60px;
+    width: 789px;
+    background-color: #e9edf1;
 }
 
+#group-head #g-info
+{ display: inline-block;}
+
 #group-head span {
-	font: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
-	font-size: 28px;
-	word-wrap:normal;
+	color: #42658b;
+    font: 700 12px / 22px Tahoma;
+    padding: 5px;
+    width: 500px;
+    margin-left: 65px;
+    display: block
 }
 
 #group-head p {
-	font: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
-	font-size: 14px;
+    color: #777777;
+    font: 700 11px / 13px Tahoma;
+    margin-left: 70px;
 }
 
 #group-head #logo {
 	float: left;
-	width: 80px;
-	height: 80px;
-	padding-right: 20px;
+    display: inline-block;
+	height: 60px;
+    width: 60px;
+}
+
+#group-head #sort {
+    color: #42658b;
+    font: 700 12px / 22px Tahoma;
+    width: 110px;
+    float: right;
+    margin: 5px 20px 0 0;
+    
 }
 
 #group-panel #group-content {
 	margin: 10px;
-	height: 580px;
+    margin-right: 5px;
+    width: 774px;
+    height: 870px;
 }
 
 
 #group-content #group-table {
-	height: 530px;
-	padding: 0px 0 0 15px;
-	overflow-y: auto;
+	height: 810px;
+    padding-top: 10px;
+    padding-left: 10px;
 }
 
 .ablock {
-	width: 75px;
+    height: 100px;
+    width: 105px;
 	float: left;
-	margin: 3px;
-	border: 1px solid #BCD2E3;
+    background-color: #E9EDF1;
     font-size: 11px;
 	color: #2B587A;
+    margin: 0 10px;
+    margin-bottom: 20px;
 }
 
 .ablock-pic {
-	height: 40px;
-	display:block;
-	margin: 5px auto;
-	max-width: 90%;
+    height: 50px;
+	display: block;
+	max-width: 100%;
+    margin: 0 auto;
 }
-	
-.likes {
-	border-top: 1px solid #BCD2E3;
+
+.ablock div {
+    font: 700 11px Tahoma;
+    color: #777777;
+    padding-left: 10px;
+    margin-top: 1px;
 }
+
+.ablock div span {
+    height: 10px;
+    margin: 0 2px;
+    padding-right: 1px;
+    width: 11px;line-height: 15px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
 .likes-icon {
-	background: url("https://vk.com/images/icons/like.gif?2") no-repeat scroll 1px 0px transparent;
-	height: 10px;
-	margin: 2px 2px 0px;
-	padding-right: 1px;
-	opacity: 0.4;
-	width: 11px;
-    display: inline-block; 
+    background: url("Like-Icon-copy.png") no-repeat;
 }
 
 .rep-icon {
-	background: url("https://vk.com/images/icons/like.gif?2") no-repeat scroll 1px 0px transparent;    
-	background-position: 0px -21px;
-	height: 10px;
-	margin: 2px 2px 0px;
-	padding-right: 1px;
-	opacity: 0.4;
-	width: 11px;
-    display: inline-block; 	
+    background: url("Repost-Icon-copy.png") no-repeat;
 }
 
 .coms-icon {
-	background: url("https://vk.com/images/icons/mono_iconset.png?1") no-repeat scroll 1px 0px;    
-	background-position: 0px -192px;
-	height: 10px;
-	margin: 2px 2px 0px;
-	padding-right: 1px;
-	opacity: 0.4;
-	width: 11px;
-    display: inline-block; 	
-
+    background: url("Comment-Icon-copy.png") no-repeat;
 }
 
-#nav-bottom 
-{
-	text-align:center;
+#sort span {
+    height: 10px;
+    width: 11px;
+    line-height: 12px;
+    vertical-align: bottom;
+    margin-left: 20px;
+    padding-top: 0;
+    opacity: 0.4;
+    display: inline;
+}
+#sort a:hover span {
+    height: 10px;
+    width: 11px;
+    line-height: 12px;
+    vertical-align: bottom;
+    margin-left: 20px;
+    padding-top: 0;
+    opacity: 1;
+    display: inline;
 }
 
-#nav-bottom a {
-	display:inline-block;
-	background-color: #BCD2E3;
-	padding: 3px 6px;
-	margin: 0 10px;
-	color: #2B587A;
-	font-size: 14px;
+#sort span.active-sort {
+    opacity: 1;
+}
+
+#sort .slike {
+    background: url("Like-Icon-copy.png") no-repeat;
+}
+
+#sort .srep {
+    background: url("Repost-Icon-copy.png") no-repeat;
+}
+
+#sort .scom {
+    background: url("Comment-Icon-copy.png") no-repeat;
+}
+
+#nav-bottom {
+    margin-right: 5px;
+}
+
+#nav-bottom a.button {
+    float: right;
+    display: inline-block;
+    opacity: 0.9;
+    width: 105px;
+    height: 28px;
+    background-color: #6383a8;
+    color: #e8eff7;
+    font: 700 12px / 13px Tahoma;
+    text-decoration: none;
+    margin-right: 20px;
+    line-height: 28px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#nav-bottom a.button:hover {
+    opacity: 1;
+}
+
+#nav-bottom a.button-disabled {
+    float: right;
+    display: inline-block;
+    background-color: #e9edf1;
+    color: #909192;
 }
