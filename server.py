@@ -46,22 +46,26 @@ def teardown_request(exception):
 @app.route('/')
 @app.route('/vk', methods = ['GET'])
 def login_demo_page():
-    error = request.args.get('error')
-    # detailed static params; render link
-    client_id = "4260316"
-    redirect_uri = url_for('parse_vk_responce', _external=True)
-    link = "https://oauth.vk.com/authorize?"
-    link += "client_id=" + client_id
-    link += "&scope=groups"
-    link += "&redirect_uri=" + redirect_uri
-    link += "&response_type=code&v=5.27"
-    return render_template('index.html', link = link, error = error)
+    try:
+        error = request.args.get('error')
+        # detailed static params; render link
+        redirect_uri = url_for('parse_vk_responce', _external=True)
+        client_id = "4260316"
+        link = "https://oauth.vk.com/authorize?"
+        link += "client_id=" + client_id
+        link += "&scope=groups"
+        link += "&response_type=code&v=5.27"
+        link += "&redirect_uri=" + redirect_uri
+        return render_template('index.html', link = link, error = error)
+    except Exception as e:
+        return "/vk-error: {0}".format(e)
 
 
 # vk auth module -- OK
 @app.route('/vk_login', methods = ['GET'])
 def parse_vk_responce():
     code = request.args.get('code')
+    #print "height", height, ", code", code
     if code:
         try:
             client_id = "4260316"
@@ -170,7 +174,7 @@ def show_demo_page():
                 offset = int(offset)
             except:
                 offset = 0
-            count = 45                                                                                          
+            count = 36                                                                                          
             posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by {1} desc limit {2} offset {3}".format(group_id, sort_type, count, offset*count)).fetchall()
             
             # buttons for navigation
@@ -189,9 +193,12 @@ def show_demo_page():
             # load actual username
             try:
                 req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
-                user_name = requests.get(req).json()["response"]["name"] #["picture"] -- avatar 100px
+                response = requests.get(req).json()["response"]
+                user_name = response["name"]
+                avatar = response["picture"] #-- avatar 100px
             except:
                 user_name = " "
+                avatar = None
 
             # finaly load stats
             try:
@@ -201,12 +208,13 @@ def show_demo_page():
             except:
                 stats = None
 
-            # !!! save last_seen val ? what if it will stay in login only
+            # !!! save last_seen val ?
+            # what if it will stay in login only
             
             return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
                                    current_group_name = current_group_name, current_group_picture = current_group_picture,
                                    offset_prev = offset_prev, offset_next = offset_next, offset = offset, count_postinfo = count_postinfo,
-                                   user_name = user_name, stats = stats, base_link = base_link, sort_type = sort_type, group_id = group_id)
+                                   user_name = user_name, avatar = avatar, stats = stats, base_link = base_link, sort_type = sort_type, group_id = group_id)
         except Exception as e:
             return "Exception: {0}".format(e)
     else:
