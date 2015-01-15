@@ -9,90 +9,120 @@
 <body>
 <div id="page">
 	<div id="acc-panel">
-        <div id="username"><b>{{ user_name }}</b></div>
-        <div id="gl"><!-- all groups -->
-			{% if group_list %}
-				{% for group in group_list %}
-					<a href="{{url_for('show_demo_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ group[0] }}">
-                    <div class="gblock">
-					<img class="gblock-pic" src="{{ group[2] }}" alt="group logo"/>
-					<div class="gtitle">{{ group[1] }}</div>
-                    </div>
-					</a>
-				{% endfor %}
-			{% else %}
-				You have no groups :(
-				У вас нет групп :(
-			{% endif %}
+        <div id="userblock">
+            {% if avatar %}
+                <img id="ava" src="{{ avatar }}"/>
+            {% else %}
+                <img id="ava" src="{{ url_for('static', filename='none.png') }}"/>
+            {% endif %}
+            <span>{{ user_name }}</span>
         </div>
-        <div id="stat"><!-- I'll place stats here... -->
-        {% if stats %}
+        <div id="gl"><!-- all groups -->
+            {% if group_list %}
+                {% for group in group_list %}
+                    <a href="{{url_for('show_demo_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ group[0] }}">
+                        <div class="gblock">
+                            <img class="gblock-pic" src="{{ group[2] }}" alt="group logo"/>
+                            <div class="gtitle">{{ group[1] }}</div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                You have no groups :(
+                У вас нет групп :(
+            {% endif %}
+        </div>
+        <div id="stat"><!-- block for stats -->
+            {% if stats %}
             <ul>
+                <br>
                 <li>Последнее обновление: {{ stats['last_update'] }}</li>
                 <li>Продолжительность: {{ stats['time'] }}</li>
+                <br>
                 <li>Всего анализировано {{ stats['totalgroups'] }} групп(ы)</li>
                 <li>Всего постов: {{ stats['totalposts'] }}</li>
             </ul>
-        {% else %}
-            Statistics-file was not found.
-        {% endif %}
+            {% else %}
+                Статистика обновляется...
+            {% endif %}
         </div>
     </div>
     <div id="group-panel">
     	<div id="group-head"><!-- current group header -->
-        	<img id="logo" src="{{ current_group_picture }}" alt="group logo"/>
-            <span>{{ current_group_name }}</span>
-            <p>Всего постов: {{ count_postinfo }}</p> 
+            <div id="g-info">
+                <img id="logo" src="{{ current_group_picture }}" alt="gropu logo"/>
+                <span>{{ current_group_name }}</span>
+                <p>Всего постов: {{ count_postinfo }}</p>
+            </div>
+            <div id="sort"><!-- choose-your-sorting block -->
+                Сортировать по:
+                {% if sort_type == "like" %}
+                    <a href="#"><span class="slike active-sort"></span></a>
+                    <a href="{{ base_link }}repo"><span class="srep"></span></a>
+                    <a href="{{ base_link }}comm"><span class="scom"></span></a>
+                {% elif sort_type == "repo" %}
+                    <a href="{{ base_link }}like"><span class="slike"></span></a>
+                    <a href="#"><span class="srep active-sort"></span></a>
+                    <a href="{{ base_link }}comm"><span class="scom"></span></a>
+                {% elif sort_type == "comm" %}
+                    <a href="{{ base_link }}like"><span class="slike"></span></a>
+                    <a href="{{ base_link }}repo"><span class="srep"></span></a>
+                    <a href="#"><span class="scom active-sort"></span></a>
+                {% endif %}
+            </div>
         </div>
         <div id="group-content">
-        	<div id="group-table"><!-- current posts -->
+        	<div id="group-table"><!-- posts in current group -->
                 {% if posts %}
                     {% for post in posts %}
-					<a href="{{ post[3] }}" target="_blank"><div class="ablock">
-                        {% if post[4] == 'None' %}
-                            <img class="ablock-pic" src="{{ url_for('static', filename='none.png') }}"/>
-                        {% else %}
-                            <img class="ablock-pic" src="{{ post[4] }}"/>
-                        {% endif %}
-						<div class="likes">
-							<span class="likes-icon"></span>
-							{{ post[0] }}
-						</div>
-						<div class="rep">
-							<span class="rep-icon"></span>
-							{{ post[1] }}
-						</div>
-						<div class="coms">
-							<span class="coms-icon"></span>
-							{{ post[2] }}
-						</div>
-					</div>
-					</a>
+                        <a href="{{ post[3] }}" target="_blank">
+                            <div class="ablock"  title="Открыть в ВК">
+                                {% if post[4] == 'None' %}
+                                    <img class="ablock-pic" src="{{ url_for('static', filename='none.png') }}"/>
+                                {% else %}
+                                    <img class="ablock-pic" src="{{ post[4] }}"/>
+                                {% endif %}
+                            <div class="likes">
+                                <span class="likes-icon"></span>
+                                {{ post[0] }}
+                            </div>
+                            <div class="rep">
+                                <span class="rep-icon"></span>
+                                {{ post[1] }}
+                            </div>
+                            <div class="coms">
+                                <span class="coms-icon"></span>
+                                {{ post[2] }}
+                            </div>
+                            </div>
+                        </a>
                     {% endfor %}
                 {% else %}
                     Группа закрыта или еще не проанализирована
                 {% endif %}
+                
             </div>
-			<div id="nav-bottom"><!-- create buttons here -->
-			{% if offset_prev or offset_next %}
-				Навигация по группе
-				<br>
-				{% if offset_prev %}
-					<a href="{{ offset_prev }}">Назад</a>
-				{% endif %}
-				{% if offset_next %}
-					<a href="{{ offset_next }}">Вперёд</a>
-				{% endif %}
-			{% endif %}
-            
-            <br><!-- try sorting, sort_type is needed for animation (diff button pics) -->
-            active sort <b>by {{ sort_type }}</b>
-            <a href="{{ base_link }}like">by likes</a>
-            <a href="{{ base_link }}comm">by comments</a>
-            <a href="{{ base_link }}repo">by reposts</a>
-	</div>
+        <div id="nav-bottom"><!-- navigation inside the group -->
+            {% if offset_next %}
+                <a href="{{ offset_next }}" class="button">Вперёд</a>
+            {% endif %}
+            {% if offset_prev %}
+                <a href="{{ offset_prev }}" class="button button-disabled">Назад</a>
+            {% endif %}
         </div>
+    </div>
   </div>
 </div>
+
+<!-- multisize screens -->
+<!--script>
+    function get_size() {
+        var h = window.innerHeight;
+        var url = window.location.href;
+        window.location.href = url + "?h=" + h;
+    }
+window.onload = get_size;
+</script-->
+
 </body>
 </html>
