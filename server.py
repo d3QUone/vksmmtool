@@ -86,8 +86,8 @@ def parse_vk_responce():
             # load old sorting ...
             res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
             try:
-                print sort_type
                 sort_type = res[0][0]
+                print "old sort_type:", sort_type
                 if sort_type not in ['like', 'repo', 'comm']:
                     sort_type = 'like'
             except:
