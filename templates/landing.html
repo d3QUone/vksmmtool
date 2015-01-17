@@ -6,13 +6,11 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script>
-        // multisize screens
         function get_size() {
             var h = window.innerHeight;
             var w = window.innerWidth;
             document.getElementById("main_link").href = "{{ link }}?h=" + h + "&w=" + w;
         }
-    window.onload = get_size;
     </script>
 </head>
 <body>
@@ -21,7 +19,7 @@
 			<tbody>
 				<tr>
 					<td>
-						<a id="main_link" href="{{ link }}" style="width: 200px;" class="btn btn-primary center-block" target="_blank">Войти через ВК</a><br>
+						<a id="main_link" href="{{ link }}" style="width: 200px;" class="btn btn-primary center-block" target="_blank" onclick="get_size();">Войти через ВК</a><br>
 					</td>
 				</tr>								
 				{% if error %}
