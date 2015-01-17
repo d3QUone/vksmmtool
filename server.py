@@ -41,14 +41,28 @@ def teardown_request(exception):
         db.close()
 
 
-# --------- VK SMM TOOL ---------
-# login -- OK
-@app.route('/')
-@app.route('/vk', methods = ['GET'])
-def login_demo_page():
+@app.route('/', methods = ['GET'])
+def landing_page():
+    error = request.args.get('error')
+    link = url_for('login_save_h')
+    return render_template('landing.html', link = link, error = error)
+
+
+@app.route('/save_h', methods = ['GET'])
+def login_save_h():
+    # parse height
+    width = request.args.get('w')
+    height = request.args.get('h')
+    print "width = {0}, height = {1}".format(width, height)
+
     try:
-        error = request.args.get('error')
-        # detailed static params; render link
+        user_IP = request.remote_addr
+        print "user_ip = {0}".format(user_IP)
+        g.db.execute("delete from screen_size where user_ip = '{0}'".format(user_IP))
+        g.db.execute("insert into screen_size (user_ip, w, h) values ('{0}', {1}, {2})".format(user_IP, width, height))
+        g.db.commit()
+
+        # redirect to vk auth then, detailed static params below; render link
         redirect_uri = url_for('parse_vk_responce', _external=True)
         client_id = "4260316"
         link = "https://oauth.vk.com/authorize?"
@@ -56,16 +70,16 @@ def login_demo_page():
         link += "&scope=groups"
         link += "&response_type=code&v=5.27"
         link += "&redirect_uri=" + redirect_uri
-        return render_template('index.html', link = link, error = error)
+        return redirect(link)
     except Exception as e:
-        return "/vk-error: {0}".format(e)
+        print "/save_h error:", e
+        return "save_h error: {0}".format(e)
 
 
 # vk auth module -- OK
 @app.route('/vk_login', methods = ['GET'])
 def parse_vk_responce():
     code = request.args.get('code')
-    #print "height", height, ", code", code
     if code:
         try:
             client_id = "4260316"
@@ -87,7 +101,7 @@ def parse_vk_responce():
             res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
             try:
                 sort_type = res[0][0]
-                print "old sort_type:", sort_type
+                #print "old sort_type:", sort_type
                 if sort_type not in ['like', 'repo', 'comm']:
                     sort_type = 'like'
             except:
@@ -95,11 +109,11 @@ def parse_vk_responce():
 
             # delete old personal data first
             g.db.execute("delete from userinfo where user_id = {0}".format(user_id))
-            g.db.commit()
+            #g.db.commit()
 
             # + save new (its faster:)
             g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen) values ({0}, '{1}', '{2}', '{3}')".format(int(user_id), access_token, sort_type, datetime.now()))
-            g.db.commit()
+            #g.db.commit()
 
             # delete old groups
             g.db.execute("delete from groups where user_id = {0}".format(user_id))
@@ -115,18 +129,18 @@ def parse_vk_responce():
             for item in groups:
                 g.db.execute("insert into groups (user_id, group_id, screen_name, picture) values ({0}, {1}, '{2}', '{3}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"]))
                 g.db.commit()
-                
+        
         except Exception as e:
             print "/vk_login err:", e
             return "error: {0}".format(e)
-        return redirect(url_for('show_demo_page', user_id = user_id, access_token = access_token))
+        return redirect(url_for('index_page', user_id = user_id, access_token = access_token))
     else:
         return "Something has gone wrong<br><a href='{0}'>go back to login page</a>".format(url_for('vk'))
 
 
 # main page
-@app.route('/demo', methods = ['GET'])
-def show_demo_page():
+@app.route('/index', methods = ['GET'])
+def index_page():
     access_token = request.args.get('access_token')
     user_id = request.args.get('user_id')
     try:
@@ -149,14 +163,19 @@ def show_demo_page():
                 group_id = int(group_id)
             except:
                 group_id = groups[0][0]
-
+                
             # way to get data for loaded group
             current_group_name = None
             current_group_picture = None
             group_list = []
             append = group_list.append
             for name in names:
-                append([name["gid"], name["name"], name["photo_medium"]])
+                # cut group name til 35 chars
+                buf_group_name = name["name"]
+                if len(buf_group_name) >= 30:
+                    buf_group_name = buf_group_name[:27] + "..."
+                
+                append([name["gid"], buf_group_name, name["photo_medium"]])
                 if str(name["gid"]) == str(group_id):
                     current_group_name = name["name"]
                     current_group_picture = name["photo_medium"]
@@ -174,21 +193,34 @@ def show_demo_page():
                 offset = int(offset)
             except:
                 offset = 0
-            count = 36                                                                                          
+
+            #screen-works here...
+            try:
+                user_ip = request.remote_addr
+                res = g.db.execute("select w, h from screen_size where user_ip = '{0}'".format(user_ip)).fetchall()
+                w, h = res[0]
+
+                cols = int((w*0.8 - 235)/125) #x
+                rows = int((h - 120.0)/120) #y
+                count = rows*cols
+                print "res = {0}, rows = {1}, cols = {2}, count = {3}".format(res, rows, cols, count)
+            except Exception as e:
+                print "w-h error: {0}".format(e)
+                count = 35
             posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by {1} desc limit {2} offset {3}".format(group_id, sort_type, count, offset*count)).fetchall()
             
             # buttons for navigation
             offset_prev = None
             if offset > 0: 
-                offset_prev = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset - 1)
+                offset_prev = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset - 1)
 
             offset_next = None
             count_postinfo = g.db.execute("select count(*) from postinfo where group_id = {0}".format(group_id)).fetchall()[0][0]
             if count*(offset + 1) < count_postinfo:
-                offset_next = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset + 1)
+                offset_next = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset + 1)
 
             # prepare change-sort links
-            base_link = url_for('show_demo_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}&sort_type=".format(user_id, access_token, group_id, offset)
+            base_link = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}&sort_type=".format(user_id, access_token, group_id, offset)
 
             # load actual username
             try:
@@ -211,133 +243,15 @@ def show_demo_page():
             # !!! save last_seen val ?
             # what if it will stay in login only
             
-            return render_template("demo.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
+            return render_template("index.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
                                    current_group_name = current_group_name, current_group_picture = current_group_picture,
                                    offset_prev = offset_prev, offset_next = offset_next, offset = offset, count_postinfo = count_postinfo,
                                    user_name = user_name, avatar = avatar, stats = stats, base_link = base_link, sort_type = sort_type, group_id = group_id)
         except Exception as e:
-            return "Exception: {0}".format(e)
+            return "Exception (index_page): {0}".format(e)
     else:
         return "'user_id' and 'access_token' were expected"
 
-
-# ------ OLD ------
-
-# vk personal page render (OLD VER)
-@app.route('/personal_page', methods = ['GET', 'POST'])
-def personal_page():
-    if request.method is 'GET':
-        user_id = request.args.get("user_id")
-        token = request.args.get("token")
-    else:
-        user_id = request.form['user_id']
-        token = request.form['token']
-        link_to_group = request.form['link_to_group']
-    
-    data = g.db.execute("select * from userinfo where user_id = {0}".format(user_id)).fetchall()[0]
-    # data = [user_id, picture, auth_token]
-    
-    if len(data) > 0:
-        if token == data[2]:
-            add_error = None
-            '''
-            # do I really need to add groups manually ???
-            # will add this as premium feature !
-            
-            if request.method == 'POST':
-                # add group from page-form
-                try:
-                    # get group id by name:
-                    link_to_group = link_to_group.split("/")
-                    gr_name = link_to_group[len(link_to_group) - 1]
-                    
-                    url = "https://api.vk.com/method/groups.getById?group_id=" + gr_name + "&v=5.27"
-                    req = requests.get(url).json()
-                    item = req['response'][0]
-
-                    new_append = {"id": item["id"], "name": item["name"], "screen_name": item["screen_name"]}
-                    if new_append not in data["groups"] + data["manual_groups"]:
-                        data["manual_groups"].append(new_append)
-                    else:
-                        add_error = "exist"
-                        
-                except Exception as e:
-                    print "post err:", str(e)
-                    add_error = "bad"
-            '''
-            all_groups = g.db.execute("select * from groups where user_id = " + str(user_id)).fetchall()
-            # ...[j] = [user_id, group_ip, screen_name, picture]
-            posts = {}
-            group_list = []
-            for group_item in all_groups:
-                try:
-                    group_id = group_item[1]
-                    screen_name = group_item[2]
-
-                    req = "https://api.vk.com/method/execute.group_name?access_token=" + token + "&id={0}".format(group_id)
-                    name = requests.get(req).json()["response"][0]
-
-                    group_list.append({"name": name, "screen_name": screen_name, "id": group_id})
-
-                    # SORTING HERE!
-                    content = g.db.execute("select like, link, comm, repo from postinfo where group_id = {0} order by like desc".format(group_id)).fetchall()
-                    # ...[j] = [group_id, picture, content=None, link, like, comm, repo] -- full
-                    # ...[j] = [like, link, comm, repo] -- now
-                    length = len(content)
-                    if length < 100:
-                        posts[screen_name] = content
-                    else:
-                        i = 0
-                        buf = []
-                        append = buf.append
-                        while i < 100:
-                            append(content[i])
-                            i += 1
-                        posts[screen_name] = buf
-                except Exception as ex:
-                    print "loading err: ", ex, ", group:", screen_name
-            try:
-                # load actual username
-                req = "https://api.vk.com/method/execute.name_pic?access_token=" + token + "&id={0}".format(user_id)
-                username = requests.get(req).json()["response"]["name"] # ["picture"] -- avatar 100px
-                        
-                # load work stats
-                f = open("statistics.txt", "r")
-                stats = json.loads(f.read())
-                f.close()
-                return render_template("vk_personal.html", username = username, group_list = group_list,
-                                       manual_groups = None, posts = posts, stats = stats,
-                                       user_id = user_id, token = token, add_error = add_error)
-            except Exception as ex:
-                return "return err: " + str(ex)
-    
-    return redirect(url_for('login_demo_page', error = "bad"))
-
-
-# detailed content of group (all posts + current stats) OLD VER
-@app.route("/detail", methods = ["GET"])
-def group_detail():
-    group_id = request.args.get("group_id")
-    if group_id:
-        try:
-            req = "https://api.vk.com/method/groups.getById?group_id={0}".format(group_id)
-            name = requests.get(req).json()["response"][0]["name"]
-            #print "name:", name
-
-            # + sorting
-            posts = g.db.execute("select like, link, comm, repo from postinfo where group_id = {0} order by like desc".format(group_id)).fetchall()
-            #                 0        1        2      3     4      5     6
-            # posts[j] = [group_id, picture, content, link, like, comm, repo]  <-- if *
-            return render_template("vk_group_detailed.html", group_name = name,
-                                   amount = len(posts), post_list = posts)
-        except Exception as ex:
-            print "detail load:", str(ex)
-            return "Sorry, something wrong... "
-    else:
-        return redirect(url_for("login_demo_page", error = "bad"))
-    
-
-# --- ERRORS ---
 
 @app.errorhandler(404)
 def not_found(error):
