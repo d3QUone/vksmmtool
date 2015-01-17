@@ -14,19 +14,16 @@ app.config.update(
     #SERVER_NAME = "178.62.64.47:5000"
 )
 
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
-
-# run once from bash to setup tables + add 'preload' values
+# run once from bash to auto-setup tables
 def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
-    #db = connect_db()
-    #db.execute("insert into userinfo (username, password, status) values ('admin1', 'zxC_aQL2', 'ok')")
-    #db.commit()
+
+
+def connect_db():
+    return sqlite3.connect(app.config['DATABASE'])
 
 
 @app.before_request
@@ -176,6 +173,7 @@ def index_page():
                 g.db.commit()
             else:
                 g.db.execute("update userinfo set last_seen = '{0}' where user_id = {1}".format(datetime.now(), user_id))
+                g.db.commit()
                 res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
                 sort_type = res[0][0]
 
