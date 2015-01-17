@@ -10,8 +10,11 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\templates <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\static <br>
 
-Don't forget to add graphic files to "static" folder:<br>
-"none.png"
+Don't forget to add graphic files to "\static" folder:<br>
+```
+"none.png", "Comment-Icon-copy.png", "Comment-Icon-sort.png", "Like-Icon-copy.png"
+"Like-Icon-sort.png", "Repost-Icon-copy.png", "Repost-Icon-sort.png"
+```
 
 3) Fill them and setup DB vis bash:
 
