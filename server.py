@@ -53,11 +53,9 @@ def login_save_h():
     # parse height
     width = request.args.get('w')
     height = request.args.get('h')
-    print "width = {0}, height = {1}".format(width, height)
-
+    user_IP = request.remote_addr
+    #print "width = {0}, height = {1}; user_ip = {2}".format(width, height, user_IP)
     try:
-        user_IP = request.remote_addr
-        print "user_ip = {0}".format(user_IP)
         g.db.execute("delete from screen_size where user_ip = '{0}'".format(user_IP))
         g.db.execute("insert into screen_size (user_ip, w, h) values ('{0}', {1}, {2})".format(user_IP, width, height))
         g.db.commit()
@@ -101,22 +99,15 @@ def parse_vk_responce():
             res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
             try:
                 sort_type = res[0][0]
-                #print "old sort_type:", sort_type
                 if sort_type not in ['like', 'repo', 'comm']:
                     sort_type = 'like'
             except:
                 sort_type = 'like'
 
-            # delete old personal data first
+            # delete old personal data first + save new 
             g.db.execute("delete from userinfo where user_id = {0}".format(user_id))
-            #g.db.commit()
-
-            # + save new (its faster:)
-            g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen) values ({0}, '{1}', '{2}', '{3}')".format(int(user_id), access_token, sort_type, datetime.now()))
-            #g.db.commit()
-
-            # delete old groups
             g.db.execute("delete from groups where user_id = {0}".format(user_id))
+            g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen) values ({0}, '{1}', '{2}', '{3}')".format(int(user_id), access_token, sort_type, datetime.now()))
             g.db.commit()
             
             # load fresh groups from account; 
@@ -147,7 +138,6 @@ def index_page():
         user_id = int(user_id)
     except:
         return "'user_id' error: int expected"
-    # + additional parameters
     group_id = request.args.get('group_id')
     offset = request.args.get('offset')
     sort_type = request.args.get('sort_type')
@@ -170,7 +160,7 @@ def index_page():
             group_list = []
             append = group_list.append
             for name in names:
-                # cut group name til 35 chars
+                # cut group name til 30 chars
                 buf_group_name = name["name"]
                 if len(buf_group_name) >= 30:
                     buf_group_name = buf_group_name[:27] + "..."
@@ -227,7 +217,7 @@ def index_page():
                 req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
                 response = requests.get(req).json()["response"]
                 user_name = response["name"]
-                avatar = response["picture"] #-- avatar 100px
+                avatar = response["picture"] # avatar 100px
             except:
                 user_name = " "
                 avatar = None
@@ -238,15 +228,11 @@ def index_page():
                 stats = json.loads(f.read())
                 f.close()
             except:
-                stats = None
-
-            # !!! save last_seen val ?
-            # what if it will stay in login only
-            
-            return render_template("index.html", group_list = group_list, posts = posts, user_id = user_id, access_token = access_token,
-                                   current_group_name = current_group_name, current_group_picture = current_group_picture,
-                                   offset_prev = offset_prev, offset_next = offset_next, offset = offset, count_postinfo = count_postinfo,
-                                   user_name = user_name, avatar = avatar, stats = stats, base_link = base_link, sort_type = sort_type, group_id = group_id)
+                stats = None            
+            return render_template("index.html", group_list = group_list, posts = posts, user_id = user_id, user_name = user_name, avatar = avatar,
+                                   access_token = access_token, current_group_name = current_group_name, current_group_picture = current_group_picture,
+                                   offset_prev = offset_prev, offset_next = offset_next, offset = offset, base_link = base_link, stats = stats,
+                                   group_id = group_id, count_postinfo = count_postinfo, sort_type = sort_type)
         except Exception as e:
             return "Exception (index_page): {0}".format(e)
     else:
@@ -255,7 +241,7 @@ def index_page():
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'code': 404, 'message': 'Page not found', 'error': str(error)}), 404)
+    return make_response(jsonify({'code': 404, 'error': 'Page not found', 'message': "{0}".format(error)}), 404)
 
 
 if __name__ == '__main__':
