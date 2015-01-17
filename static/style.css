@@ -1,1 +1,293 @@
-@charset "utf-8";*{margin:0;padding:0;border:0;font-family:tahoma,arial,verdana,sans-serif,Lucida Sans}a{text-decoration:none}#page{position:fixed;width:100%;bottom:0;top:0;min-height:600px;min-width:1008px;overflow:auto;width:80%;margin:0 auto 0 10%;-webkit-box-shadow:0 0 3px 0 rgba(50,50,50,0.5);-moz-box-shadow:0 0 3px 0 rgba(50,50,50,0.5);box-shadow:0 0 3px 0 rgba(50,50,50,0.5)}#page #acc-panel{width:235px;position:relative;height:100%;background-color:#42658b;float:left;position:absolute}#acc-panel #userblock{height:40px;font:700 12px / 22px Tahoma;width:235px;position:absolute}#userblock #ava{height:40px;width:40px;display:block-inline;float:left}#userblock span{display:block-inline;padding:50px 0 0 14px;height:40px;line-height:40px;color:#e8eff7}#acc-panel #gl{width:235px;overflow-y:auto;background-color:#4f7195;position:absolute;top:40px;bottom:60px;min-height:400px}.gblock{height:30px;padding:3px;overflow:hidden;text-overflow:ellipsis}.gblock:hover{background-color:#42658b}.gblock-selected{background-color:#42658b}.gblock-pic{width:20px;height:20px;padding:5px;float:left;display:block-inline}.gtitle{font:700 11px / 13px Tahoma;color:#e8eff7;padding-right:15px}#acc-panel #stat{background-color:#42658b;width:235px;font:700 10px / 13px Tahoma;color:#e8eff7;position:absolute;bottom:0;height:60px}#stat ul{list-style:none;margin:3px 19px}#page #group-panel{height:100%;background-color:#fffffc;margin-left:235px}#group-panel #group-head{height:60px;background-color:#e9edf1;position:relative;left:0}#group-head #g-info{display:inline-block}#group-head span{color:#42658b;font:700 12px / 22px Tahoma;padding:5px;width:500px;margin-left:65px;display:block}#group-head p{color:#777;font:700 11px / 13px Tahoma;margin-left:70px}#group-head #logo{float:left;display:inline-block;height:60px;width:60px}#group-head #sort{color:#42658b;font:700 12px / 22px Tahoma;width:110px;float:right;margin:5px 20px 0 0}#group-panel #group-content{position:absolute;top:60px;right:0;left:235px;bottom:60px;padding:10px}#group-content #group-table{min-height:400px;position:relative;width:100%;height:100%}.ablock{height:100px;width:105px;float:left;background-color:#e9edf1;font-size:11px;color:#2b587a;margin:0 10px;margin-bottom:20px}.ablock-pic{height:50px;display:block;max-width:100%;margin:0 auto}.ablock div{font:700 11px Tahoma;color:#777;padding-left:10px;margin-top:1px}.ablock div span{height:10px;margin:0 2px;padding-right:1px;width:11px;line-height:15px;vertical-align:middle;display:inline-block}.likes-icon{background:url(Like-Icon-copy.png) no-repeat;margin-top:1px}.rep-icon{background:url(Repost-Icon-copy.png) no-repeat;background-size:contain;margin-bottom:1px}.coms-icon{background:url(Comment-Icon-copy.png) no-repeat;background-size:contain}#sort span{height:15px;width:15px;line-height:15px;vertical-align:bottom;margin-left:8px;padding-top:0;opacity:.4;display:inline-block}#sort a:hover span{opacity:1}#sort span.active-sort{opacity:1}#sort .slike{background:url(Like-Icon-sort.png) no-repeat}#sort .scom{background:url(Comment-Icon-sort.png) no-repeat}#sort .srep{background:url(Repost-Icon-sort.png) no-repeat}#nav-bottom{height:60px;bottom:0;right:0;position:absolute;left:235px;background-color:#fff}#nav-bottom a.button{float:right;display:inline-block;opacity:.9;width:105px;height:30px;background-color:#6383a8;color:#e8eff7;font:700 12px / 13px Tahoma;text-decoration:none;margin:15px 20px 15px 0;line-height:28px;text-align:center}#nav-bottom a.button:hover{opacity:1}#nav-bottom a.button-disabled{float:right;display:inline-block;background-color:#e9edf1;color:#909192}
+@charset "utf-8";
+/* CSS Document */
+* { margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: tahoma,arial,verdana,sans-serif,Lucida Sans;
+}
+
+a {
+    text-decoration: none;
+}
+
+#page {
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
+    top: 0px;
+    min-height: 600px;
+    min-width: 500px;
+    overflow: auto;
+    width: 80%;
+    margin: 0px auto 0px 10%;
+    -webkit-box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.5);
+    -moz-box-shadow:    0px 0px 3px 0px rgba(50, 50, 50, 0.5);
+    box-shadow:         0px 0px 3px 0px rgba(50, 50, 50, 0.5);
+}
+
+
+#page #acc-panel {
+    width: 235px;
+    position: relative;
+    height: 100%;
+    background-color: #42658b;
+    float: left;
+    position: absolute;
+}
+
+#acc-panel #userblock
+{
+    height: 40px;
+    font: 700 12px / 22px Tahoma;
+    width: 235px;
+    position: absolute;
+}
+
+#userblock #ava {
+    height: 40px;
+    width: 40px;
+    display: block-inline;
+    float: left;
+}
+
+#userblock span {
+    display: block-inline;
+    padding: 50px 0 0 14px;
+    height: 40px;
+    line-height: 40px;
+    color: #e8eff7;
+    
+}
+
+#acc-panel #gl {
+    width: 235px;
+    overflow-y: auto;
+    background-color: #4f7195;
+    position: absolute;
+    top: 40px;
+    bottom: 60px;
+    min-height: 400px;
+}
+
+.gblock {
+    height: 30px;
+    padding: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gblock:hover {
+    background-color: #42658B;
+}
+
+.gblock-selected {
+    background-color: #42658B;
+}
+
+.gblock-pic {
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    float: left;
+    display:block-inline;
+}
+
+.gtitle {
+    font: 700 11px / 13px Tahoma;
+    color: #e8eff7;
+    padding-right: 15px;
+}
+
+#acc-panel #stat {
+    background-color: #42658b;
+    width: 235px;
+    font: 700 10px / 13px Tahoma;
+    color: #e8eff7;
+    position: absolute;
+    bottom: 0px;
+    height: 60px;
+}
+
+#stat ul {
+    list-style:none;
+    margin: 3px 19px;
+}
+
+#page #group-panel{
+    height: 100%;
+    background-color: #FFFFFC;
+    margin-left: 235px;
+}
+
+#group-panel #group-head {
+    height: 60px;
+    background-color: #e9edf1;
+    position: relative;
+    left: 0;
+}
+
+#group-head #g-info
+{ display: inline-block;}
+
+#group-head span {
+    color: #42658b;
+    font: 700 12px / 22px Tahoma;
+    padding: 5px;
+    width: 300px;
+    margin-left: 65px;
+    display: block
+}
+
+#group-head p {
+    color: #777777;
+    font: 700 11px / 13px Tahoma;
+    margin-left: 70px;
+}
+
+#group-head #logo {
+    float: left;
+    display: inline-block;
+    height: 60px;
+    width: 60px;
+}
+
+#group-head #sort {
+    color: #42658b;
+    font: 700 12px / 22px Tahoma;
+    width: 110px;
+    float: right;
+    margin: 5px 20px 0 0;
+    
+}
+
+#group-panel #group-content {
+    position: absolute;
+    top: 60px;
+    right: 0px;
+    left: 235px;
+    bottom: 60px;
+    padding: 10px;
+}
+
+
+#group-content #group-table {
+    min-height: 400px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.ablock {
+    height: 100px;
+    width: 105px;
+    float: left;
+    background-color: #E9EDF1;
+    font-size: 11px;
+    color: #2B587A;
+    margin: 0 10px;
+    margin-bottom: 20px;
+}
+
+.ablock-pic {
+    height: 50px;
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.ablock div {
+    font: 700 11px Tahoma;
+    color: #777777;
+    padding-left: 10px;
+    margin-top: 1px;
+}
+
+.ablock div span {
+    height: 10px;
+    margin: 0 2px;
+    padding-right: 1px;
+    width: 11px;line-height: 15px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.likes-icon {
+    background: url(Like-Icon-copy.png) no-repeat;
+    margin-top: 1px;
+}
+
+.rep-icon {
+    background: url(Repost-Icon-copy.png) no-repeat;
+    background-size: contain;
+    margin-bottom: 1px;
+}
+
+.coms-icon {
+    background: url(Comment-Icon-copy.png) no-repeat;
+    background-size: contain;
+}
+
+#sort span {
+    height: 15px;
+    width: 15px;
+    line-height: 15px;
+    vertical-align: bottom;
+    margin-left: 8px;
+    padding-top: 0;
+    opacity: 0.4;
+    display: inline-block;
+}
+#sort a:hover span {
+    opacity: 1;
+}
+
+#sort span.active-sort {
+    opacity: 1;
+}
+
+#sort .slike {
+    background: url(Like-Icon-sort.png) no-repeat;
+}
+
+#sort .scom {
+    background: url(Comment-Icon-sort.png) no-repeat;
+}
+
+#sort .srep {
+    background: url(Repost-Icon-sort.png) no-repeat;
+}
+
+#nav-bottom {
+    height: 60px;
+    bottom: 0px;
+    right: 0px;
+    position: absolute;
+    left: 235px;
+    background-color: #fff;
+}
+
+#nav-bottom a.button {
+    float: right;
+    display: inline-block;
+    opacity: 0.9;
+    width: 105px;
+    height: 30px;
+    background-color: #6383a8;
+    color: #e8eff7;
+    font: 700 12px / 13px Tahoma;
+    text-decoration: none;
+    margin: 15px 20px 15px 0;
+    line-height: 28px;
+    text-align: center;
+}
+
+#nav-bottom a.button:hover {
+    opacity: 1;
+}
+
+#nav-bottom a.button-disabled {
+    float: right;
+    display: inline-block;
+    background-color: #e9edf1;
+    color: #909192;
+}
