@@ -1,3 +1,9 @@
+drop table if exists screen_size;
+create table screen_size (
+  user_ip text,
+  w integer,
+  h integer
+);
 drop table if exists userinfo;
 create table userinfo (
   user_id integer not null,
