@@ -16,12 +16,13 @@ Don't forget to add graphic files to "\static" folder:<br>
 "Like-Icon-sort.png", "Repost-Icon-copy.png", "Repost-Icon-sort.png"
 ```
 
-3) Fill them and setup DB vis bash:
+3) Fill them and setup DB via bash from \vksmmtool-folder:
 
 ```bash
 python
-import server
-server.init_db()
+
+>>> import server
+>>> server.init_db()
 ```
 
 4) Run it in 2 screens (for example)
@@ -30,4 +31,8 @@ server.init_db()
 
 <code>screen python server.py</code>
 <hr>
-<a href="http://178.62.64.47:5000/" target="_blank"><b>Try pre-release version</b></a> (Vkontakte-account is required)
+<a href="http://178.62.64.47:5000/" target="_blank"><b>Try pre-release version</b></a>
+or 
+<a href="http://vksmm.info/" target="_blank"><b>actual version</b></a>
+<br>
+(http://vk.com/  account is required)
