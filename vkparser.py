@@ -87,7 +87,7 @@ def controller():
         all_groups = get_unique_groups("select added, group_id from groups")
         try:
             new_id = full_cycle_v2(processed_groups, all_groups)
-            print "new_id", new_id
+            print "new_id", new_id, "saved"
             append(new_id)
         except Exception as e:
             save_log("full_cycle error: {0}".format(e))
@@ -126,10 +126,9 @@ def full_cycle_v2(processed_groups, all_):
     while i < len(all_groups):
         item = all_groups[i]
         try:
-            group_id = item[1] # if error (what error?) -- alert and move forward
+            group_id = item[1]
             if group_id not in processed_groups:
                 posts = get_out_db("select link from postinfo where group_id = {0}".format(group_id))
-                #print "group_id={0}, {1} posts in base".format(group_id, len(posts))
                 if len(posts) == 0: # group is new or closed, anyway - we start with this group
                     chosen_id = group_id
                     break
@@ -146,7 +145,6 @@ def full_cycle_v2(processed_groups, all_):
         group_id = chosen_id
     else:
         group_id = all_groups[0][1] # -- first group of leftover
-    print "group_id =", group_id
     auth_token = None
     ret = getA(group_id, auth_token, 0, 1)
 
@@ -161,13 +159,10 @@ def full_cycle_v2(processed_groups, all_):
         user_id = get_out_db("select user_id from groups where group_id = {0} order by added desc".format(group_id))[0][0]
         auth_token = get_out_db("select auth_token from userinfo where user_id = {0}".format(user_id))
         ret = getA(group_id, auth_token, 0, 1)
-
-        # get count or error
-        print "new response: {0}".format(ret)
         if "count" in ret.keys():
             count = ret["count"]
         else:
-            #print "sorry: {0}".format(ret)
+            print "sorry... error_code: {0}, message: {1}".format(error_code, ret["message"])
             return group_id
     else:
         return group_id
@@ -175,7 +170,6 @@ def full_cycle_v2(processed_groups, all_):
     save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
     screen_name = get_out_db('select screen_name from groups where group_id = {0}'.format(group_id))[0][0]
     print "screen_name:", screen_name, ", group_id:", group_id, ", nums to parse:", str(count)
-    
     offset = count//100 + 1
     for i in range(0, offset):
         posts = getA(group_id, auth_token, i*100, 100)
