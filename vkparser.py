@@ -90,8 +90,7 @@ def controller():
     append = processed_groups.append
     while True:
         t = datetime.now()
-                                                                             #GAP HERE!!!
-        all_groups = get_unique_groups("select added, group_id from groups") #where user_id = 51758590")
+        all_groups = get_unique_groups("select added, group_id from groups")
         try:
             new_id = full_cycle_v2(processed_groups, all_groups)
             append(new_id)
@@ -206,11 +205,12 @@ def full_cycle_v2(processed_groups, all_):
                         if a_type in ['photo', 'video']:
                             picture = post['attachments'][0][a_type]['photo_130']
                 except Exception as ex:
-                    save_log("pic error: {0}".format(ex))
+                    picture = None
+                    save_log("no key: {0}, link: {1}".format(ex, link))
                 save_into_db("insert into postinfo (group_id, link, like, comm, repo, picture) values ({0}, '{1}', {2}, {3}, {4}, '{5}')".format(group_id, link, like, comm, repo, picture))
             except BaseException as ex:
-                save_log("link error: {0}".format(ex))
-                print "link error: ", ex
+                save_log("link error: {0}, full post: {1}, full response: {2}".format(ex, post, posts))
+                print "link error: ", ex, "full post: ", post
         time.sleep(0.35)
     return group_id
 
