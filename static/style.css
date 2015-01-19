@@ -1,15 +1,14 @@
 @charset "utf-8";
 /* CSS Document */
 * { margin: 0;
-    padding: 0;
-    border: 0;
-    font-family: tahoma,arial,verdana,sans-serif,Lucida Sans;
+padding: 0;
+border: 0;
+font-family: tahoma,arial,verdana,sans-serif,Lucida Sans;
 }
 
-a {
+a { 
     text-decoration: none;
-}
-
+} 
 #page {
     position: fixed;
     width: 100%;
@@ -17,7 +16,7 @@ a {
     top: 0px;
     min-height: 600px;
     min-width: 500px;
-    overflow: auto;
+    overflow: auto; 
     width: 80%;
     margin: 0px auto 0px 10%;
     -webkit-box-shadow: 0px 0px 3px 0px rgba(50, 50, 50, 0.5);
@@ -27,17 +26,17 @@ a {
 
 
 #page #acc-panel {
-    width: 235px;
+	width: 235px;
     position: relative;
     height: 100%;
     background-color: #42658b;
     float: left;
-    position: absolute;
+    position: absolute; 
 }
 
 #acc-panel #userblock
 {
-    height: 40px;
+	height: 40px;
     font: 700 12px / 22px Tahoma;
     width: 235px;
     position: absolute;
@@ -60,8 +59,8 @@ a {
 }
 
 #acc-panel #gl {
-    width: 235px;
-    overflow-y: auto;
+	width: 235px;
+	overflow-y: auto;
     background-color: #4f7195;
     position: absolute;
     top: 40px;
@@ -70,30 +69,30 @@ a {
 }
 
 .gblock {
-    height: 30px;
-    padding: 3px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+	height: 30px;	
+	padding: 3px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .gblock:hover {
-    background-color: #42658B;
+	background-color: #42658B;
 }
 
 .gblock-selected {
-    background-color: #42658B;
+	background-color: #42658B;
 }
 
 .gblock-pic {
-    width: 20px;
+	width: 20px;
     height: 20px;
-    padding: 5px;
-    float: left;
-    display:block-inline;
+	padding: 5px;
+	float: left;
+	display:block-inline;
 }
 
 .gtitle {
-    font: 700 11px / 13px Tahoma;
+	font: 700 11px / 13px Tahoma;
     color: #e8eff7;
     padding-right: 15px;
 }
@@ -109,28 +108,28 @@ a {
 }
 
 #stat ul {
-    list-style:none;
+	list-style:none;
     margin: 3px 19px;
 }
 
 #page #group-panel{
-    height: 100%;
-    background-color: #FFFFFC;
-    margin-left: 235px;
+	height: 100%;
+	background-color: #FFFFFC;
 }
 
 #group-panel #group-head {
-    height: 60px;
+	height: 60px;
     background-color: #e9edf1;
-    position: relative;
-    left: 0;
+    position: absolute;
+    left: 235px;
+    right: 0px;
 }
 
 #group-head #g-info
 { display: inline-block;}
 
 #group-head span {
-    color: #42658b;
+	color: #42658b;
     font: 700 12px / 22px Tahoma;
     padding: 5px;
     width: 300px;
@@ -145,9 +144,9 @@ a {
 }
 
 #group-head #logo {
-    float: left;
+	float: left;
     display: inline-block;
-    height: 60px;
+	height: 60px;
     width: 60px;
 }
 
@@ -162,9 +161,9 @@ a {
 
 #group-panel #group-content {
     position: absolute;
+    left: 235px;
     top: 60px;
     right: 0px;
-    left: 235px;
     bottom: 60px;
     padding: 10px;
 }
@@ -180,18 +179,18 @@ a {
 .ablock {
     height: 100px;
     width: 105px;
-    float: left;
+	float: left;
     background-color: #E9EDF1;
     font-size: 11px;
-    color: #2B587A;
+	color: #2B587A;
     margin: 0 10px;
     margin-bottom: 20px;
 }
 
 .ablock-pic {
     height: 50px;
-    display: block;
-    max-width: 100%;
+	display: block;
+	max-width: 100%;
     margin: 0 auto;
 }
 
@@ -212,18 +211,18 @@ a {
 }
 
 .likes-icon {
-    background: url(Like-Icon-copy.png) no-repeat;
+    background: url(images/Like-Icon-copy.png) no-repeat;
     margin-top: 1px;
 }
 
 .rep-icon {
-    background: url(Repost-Icon-copy.png) no-repeat;
+    background: url(images/Repost-Icon-copy.png) no-repeat;
     background-size: contain;
     margin-bottom: 1px;
 }
 
 .coms-icon {
-    background: url(Comment-Icon-copy.png) no-repeat;
+    background: url(images/Comment-Icon-copy.png) no-repeat;
     background-size: contain;
 }
 
@@ -246,18 +245,18 @@ a {
 }
 
 #sort .slike {
-    background: url(Like-Icon-sort.png) no-repeat;
+    background: url(images/Like-Icon-sort.png) no-repeat;
 }
 
 #sort .scom {
-    background: url(Comment-Icon-sort.png) no-repeat;
+    background: url(images/Comment-Icon-sort.png) no-repeat;
 }
 
 #sort .srep {
-    background: url(Repost-Icon-sort.png) no-repeat;
+    background: url(images/Repost-Icon-sort.png) no-repeat;
 }
 
-#nav-bottom {
+#nav-bottom {    
     height: 60px;
     bottom: 0px;
     right: 0px;
@@ -266,7 +265,7 @@ a {
     background-color: #fff;
 }
 
-#nav-bottom a.button {
+a.button {
     float: right;
     display: inline-block;
     opacity: 0.9;
@@ -290,4 +289,96 @@ a {
     display: inline-block;
     background-color: #e9edf1;
     color: #909192;
+}
+
+
+#land {
+    width: 930px;
+    height: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -200px 0 0 -450px;
+}
+
+#slideshow {
+    float: left;
+    width: 600px;
+    height: 400px;
+}
+
+#slideshow div {
+    width: 600px;
+    height: 400px;
+}
+
+#slideshow div img {
+    display: none;
+    height: 400px;
+    margin: auto;
+    -webkit-box-shadow: 0px 0px 4px 0px rgba(50, 50, 50, 0.78);
+    -moz-box-shadow:    0px 0px 4px 0px rgba(50, 50, 50, 0.78);
+    box-shadow:         0px 0px 4px 0px rgba(50, 50, 50, 0.78);
+}
+
+#slideshow #slide-nav {
+    display: block;
+    width: 600px;
+    background-color: #42658b;
+    height: 28px;
+}
+
+#slide-nav ol
+{
+    list-style: none;   
+    float: right;
+    margin-right: 10px;
+    height: 28px;
+}
+
+#slide-nav ol li{
+    display: inline-block;
+    background: url(images/Ellipse-1-copy.png);
+    width: 8px;
+    height: 8px;
+}
+
+#slide-nav ol li.slide-active {
+    
+    background: url(images/Ellipse-1-copy-3.png);}
+
+#slide-nav ol li:hover{
+    background: url(images/Ellipse-1-copy-3.png);
+}
+
+img.slide-1 {
+    display: block !important;
+}
+
+#serv-info{
+    margin-left: 650px;
+    height: 400px;
+    font: 700 11px / 18px Tahoma;
+}
+
+#serv-info div {
+    height: 370px;
+    color: #e9ecf1;
+}
+
+#serv-info div h3 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#serv-info div p {
+    margin-bottom: 10px;
+}
+
+a.auth-button {
+    margin: 0px auto !important;
+    float: none  !important;
+    display: block !important;
+    background-color: #42658b !important;
+    width: 120px !important;
 }
