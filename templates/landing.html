@@ -1,10 +1,9 @@
-<!DOCTYPE html>
+<!Doctype html>
 <html>
 <head>
+    <meta charset="utf-8">
 	<title>VKSMM</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
     <script>
         function get_size() {
             var h = window.innerHeight;
@@ -13,40 +12,56 @@
         }
     </script>
 </head>
-<body>
-	<div style="margin: 10% auto; width: 600px;" class="row">
-		<table style="width: 100%;">
-			<tbody>
-				<tr>
-					<td>
-						<a id="main_link" href="{{ link }}" style="width: 200px;" class="btn btn-primary center-block" target="_blank" onclick="get_size();">Войти через ВК</a><br>
-					</td>
-				</tr>								
-				{% if error %}
-				<tr>
-					<td>
-						<div class="alert alert-danger center-block" style="width: 200px;" role="alert" align="center">
-							<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-							{% if error == 'bad' %}
-                                <b>Ошибка</b>
-                            {% else %}
-                                <b>{{ error }}</b>
-                            {% endif %}
-						</div>
-					</td>
-				</tr>
-				{% endif %}
-			</tbody>
-		</table>
-		<!--div class="panel panel-primary">
-			<div class="panel-body" style="text-align: center;">
-				{% if all_groups %}
-					<a href="{{ all_groups }}" target="_blank">Список всех групп</a>
-				{% else %}
-					Скоро станет доступен список всех зарегистрированных групп
-				{% endif %}
-			</div>
-		</div-->
+<body style="background-color: #6383a8">
+	<div id="land">
+        <div id="slideshow">
+            <div>
+                <img src="{{ url_for('static', filename='adv_image1.png') }}" class="slide-1"/>
+            </div>
+        </div>
+        
+		<div id="serv-info">
+			<div>
+                    <h3>VKSMM</h3>
+                    <p>Это сервис для просмотра популярного материала из ваших групп</p>
+                    <p>Выборка по лайкам, репостам, комментариям</p>
+
+                    <p>Лучшие посты всегда под рукой</p>
+
+                    <p>Данные обновляются автоматически</p>
+
+                    <p>Сервис не хранит никакой персональной информацию из ВКонтакте, вся предоставляемая информация берется из открытых источников посредством API ВКонтакте и принадлежит её владельцам и ВКонтакте</p>
+            </div>
+                <a id="main_link" class="button auth-button" href="{{ link }}" onclick="get_size();">Войти через ВК</a>
+                
+		</div>
     </div>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+     (w[c] = w[c] || []).push(function() {
+                              try {
+                              w.yaCounter27980823 = new Ya.Metrika({id:27980823,
+                                                                   webvisor:true,
+                                                                   clickmap:true,
+                                                                   trackLinks:true,
+                                                                   accurateTrackBounce:true});
+                              } catch(e) { }
+                              });
+     
+     var n = d.getElementsByTagName("script")[0],
+     s = d.createElement("script"),
+     f = function () { n.parentNode.insertBefore(s, n); };
+     s.type = "text/javascript";
+     s.async = true;
+     s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+     
+     if (w.opera == "[object Opera]") {
+     d.addEventListener("DOMContentLoaded", f, false);
+     } else { f(); }
+     })(document, window, "yandex_metrika_callbacks");
+    </script>
+<noscript><div><img src="//mc.yandex.ru/watch/27980823?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 </body>
 </html>
