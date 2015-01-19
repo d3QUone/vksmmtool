@@ -115,7 +115,7 @@ def parse_vk_responce():
             req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_ids)
             groups = requests.get(req).json()["response"]
             for item in groups:
-                g.db.execute("insert into groups (user_id, group_id, screen_name, picture) values ({0}, {1}, '{2}', '{3}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"]))
+                g.db.execute("insert into groups (user_id, group_id, screen_name, picture, added) values ({0}, {1}, '{2}', '{3}', {4})".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time())))
                 g.db.commit()
         
         except Exception as e:
