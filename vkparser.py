@@ -74,14 +74,13 @@ def save_into_db(statement):
 
 
 def get_unique_groups(params):
-    # params: "select added, group_id from groups"
+    # params exmpl: "select added, group_id from groups"
     all_groups_raw = get_out_db(params)
     all_groups = []
     append = all_groups.append
     for item in all_groups_raw:
         if item not in all_groups:
             append(item)
-    all_groups.sort()
     return all_groups
 
 
@@ -90,19 +89,22 @@ def controller():
     append = processed_groups.append
     while True:
         t = datetime.now()
-        all_groups = get_unique_groups("select added, group_id from groups")
+        all_groups = get_unique_groups("select added, group_id from groups order by added desc")
         try:
             new_id = full_cycle_v2(processed_groups, all_groups)
-            append(new_id)
-            print "new_id={0} saved".format(new_id)
+            if new_id:
+                append(new_id)
+                print "new_id={0} saved".format(new_id)
+            else:
+                print "smth wrong, new_id={0}, len(processed_groups)={1}, len(all_groups)={2}".format(new_id, len(processed_groups), len(all_groups))
+                save_log("smth wrong, new_id={0}, len(processed_groups)={1}, len(all_groups)={2}".format(new_id, len(processed_groups), len(all_groups)))
         except Exception as e:
-            save_log("full_cycle error: {0}".format(e))
-            print "full_cycle error: {0}".format(e)
-            print "\nlen(processed_groups)={0}, len(all_groups)={1}".format(len(processed_groups), len(all_groups))
-            time.sleep(3)
+            save_log("full_cycle error: {0}, len(processed_groups)={1}, len(all_groups)={2}".format(e, len(processed_groups), len(all_groups)))
+            print "full_cycle error: {0}, len(processed_groups)={1}, len(all_groups)={2}".format(e, len(processed_groups), len(all_groups))
+            time.sleep(1)
             
         if len(all_groups) == len(processed_groups):
-            print "\nall groups were updated!".upper()
+            print "\nall groups were updated!\n".upper()
             del processed_groups[:]
             
         # update stats
@@ -123,7 +125,7 @@ def controller():
         stat.write(json.dumps({"totalgroups": "{0}".format(len(all_groups)), "totalposts": 0, "time": dt, "last_update": last_update}))
         stat.close()
         print "--"*25
-
+        
 
 # actually scans only 1 group, save parsed groups 
 def full_cycle_v2(processed_groups, all_):
@@ -147,12 +149,13 @@ def full_cycle_v2(processed_groups, all_):
             print "Allert: data error, {0}. Raw: {1}".format(e, item)
     try:
         # process chosen id           
-        if chosen_id != -1:
-            group_id = chosen_id
-        else:
+        if chosen_id == -1:
             group_id = all_groups[0][1] # -- first group of leftover
+        else:
+            group_id = chosen_id
     except Exception as e:
-        print "choose_id exception: {0}".format(e)
+        print "choose_id exception: {0}, all_groups: {1}".format(e, all_groups)
+        return None
     
     auth_token = None
     ret = getA(group_id, auth_token, 0, 1)
@@ -166,10 +169,10 @@ def full_cycle_v2(processed_groups, all_):
         print "error_code: {0}\nmessage: {1}\n".format(error_code, ret["message"])
         user_id = get_out_db("select user_id from groups where group_id = {0} order by added desc".format(group_id))[0][0]
         auth_token = get_out_db("select auth_token from userinfo where user_id = {0}".format(user_id))
-        ret = getA(group_id, auth_token, 0, 2)
+        ret = getA(group_id, auth_token, 0, 1)
         #print ret         
         if "count" in ret.keys():
-            count = ret["count"]
+            count = int(ret["count"])
         else:
             print "sorry... error_code: {0}, message: {1}".format(error_code, ret["message"])
             save_log(ret)
@@ -206,7 +209,7 @@ def full_cycle_v2(processed_groups, all_):
                             picture = post['attachments'][0][a_type]['photo_130']
                 except Exception as ex:
                     picture = None
-                    save_log("no key: {0}, link: {1}".format(ex, link))
+                    #save_log("no key: {0}, link: {1}".format(ex, link))
                 save_into_db("insert into postinfo (group_id, link, like, comm, repo, picture) values ({0}, '{1}', {2}, {3}, {4}, '{5}')".format(group_id, link, like, comm, repo, picture))
             except BaseException as ex:
                 save_log("link error: {0}, full post: {1}, full response: {2}".format(ex, post, posts))
