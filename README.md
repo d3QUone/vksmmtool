@@ -29,7 +29,7 @@ python
 
 <code>screen python vkparser.py</code>
 
-5) Setup NGNIX-server and Gunicorn, using  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>
+5) Setup NGNIX-server and Gunicorn, following  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>
 
 and run it
 
