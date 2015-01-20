@@ -11,7 +11,6 @@ app = Flask(__name__)
 app.config.update(
     DATABASE = 'base.db',
     DEBUG = False
-    #SERVER_NAME = "178.62.64.47:5000"
 )
 
 # run once from bash to auto-setup tables
@@ -58,7 +57,7 @@ def login_save_h():
         g.db.commit()
 
         # redirect to vk auth then, detailed static params below; render link
-        redirect_uri = url_for('parse_vk_responce', _external=True)
+        redirect_uri = "http://vksmm.info" + url_for('parse_vk_responce')  #url_for('parse_vk_responce', _external=True)
         client_id = "4260316"
         link = "https://oauth.vk.com/authorize?"
         link += "client_id=" + client_id
@@ -79,7 +78,7 @@ def parse_vk_responce():
         try:
             client_id = "4260316"
             client_secret = "x9Qe9JKVfoTG57LMKUgH"
-            redirect_uri = url_for('parse_vk_responce', _external=True)
+            redirect_uri = "http://vksmm.info" + url_for('parse_vk_responce') #url_for('parse_vk_responce', _external=True)
             # render link and get auth_token, user_id
             req = "https://oauth.vk.com/access_token?"
             req += "client_id=" + client_id
