@@ -25,14 +25,13 @@ python
 >>> server.init_db()
 ```
 
-4) Run it in 2 screens (for example)
+4) Run parser in a screen
 
 <code>screen python vkparser.py</code>
 
-<code>screen python server.py</code>
+5) Setup NGNIX-server and Gunicorn, using  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>
+
+and run it
+
 <hr>
-<a href="http://178.62.64.47:5000/" target="_blank"><b>Try pre-release version</b></a>
-or 
-<a href="http://vksmm.info/" target="_blank"><b>actual version</b></a>
-<br>
-(http://vk.com/  account is required)
+<a href="http://vksmm.info/" target="_blank"><b>Check it </b></a> (http://vk.com/  account is required)
