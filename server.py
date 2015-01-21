@@ -137,7 +137,6 @@ def index_page():
     group_id = request.args.get('group_id')
     offset = request.args.get('offset')
     sort_type = request.args.get('sort_type')
-                                   
     if user_id and access_token:
         try:
             groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
@@ -186,7 +185,11 @@ def index_page():
                 user_ip = request.remote_addr
                 res = g.db.execute("select w, h from screen_size where user_ip = '{0}'".format(user_ip)).fetchall()
                 w, h = res[0]
+                # check sizes every time
 
+                #w = int(request.args.get('w'))
+                #h = int(request.args.get('h'))
+                
                 cols = int((w*0.8 - 235)/125) #x
                 rows = int((h - 120.0)/120) #y
                 count = rows*cols
