@@ -211,18 +211,18 @@ a {
 }
 
 .likes-icon {
-    background: url(images/Like-Icon-copy.png) no-repeat;
+    background: url(Like-Icon-copy.png) no-repeat;
     margin-top: 1px;
 }
 
 .rep-icon {
-    background: url(images/Repost-Icon-copy.png) no-repeat;
+    background: url(Repost-Icon-copy.png) no-repeat;
     background-size: contain;
     margin-bottom: 1px;
 }
 
 .coms-icon {
-    background: url(images/Comment-Icon-copy.png) no-repeat;
+    background: url(Comment-Icon-copy.png) no-repeat;
     background-size: contain;
 }
 
@@ -245,15 +245,15 @@ a {
 }
 
 #sort .slike {
-    background: url(images/Like-Icon-sort.png) no-repeat;
+    background: url(Like-Icon-sort.png) no-repeat;
 }
 
 #sort .scom {
-    background: url(images/Comment-Icon-sort.png) no-repeat;
+    background: url(Comment-Icon-sort.png) no-repeat;
 }
 
 #sort .srep {
-    background: url(images/Repost-Icon-sort.png) no-repeat;
+    background: url(Repost-Icon-sort.png) no-repeat;
 }
 
 #nav-bottom {    
@@ -338,17 +338,17 @@ a.button {
 
 #slide-nav ol li{
     display: inline-block;
-    background: url(images/Ellipse-1-copy.png);
+    background: url(Ellipse-1-copy.png);
     width: 8px;
     height: 8px;
 }
 
 #slide-nav ol li.slide-active {
     
-    background: url(images/Ellipse-1-copy-3.png);}
+    background: url(Ellipse-1-copy-3.png);}
 
 #slide-nav ol li:hover{
-    background: url(images/Ellipse-1-copy-3.png);
+    background: url(Ellipse-1-copy-3.png);
 }
 
 img.slide-1 {
@@ -381,4 +381,46 @@ a.auth-button {
     display: block !important;
     background-color: #42658b !important;
     width: 120px !important;
+}
+
+/* updates 21.01 */
+#progress {
+    float: left;
+    margin: 24px;
+    font: 700 11px/12px Tahoma;
+    color: #777;
+}
+
+#overlap {
+    height: 100%;
+    width: 100%;
+    max-height: 100%;
+    position: fixed;
+    z-index: 9998;
+    top: 0px;
+    left: 0px;
+    background-color: #000;
+    opacity: 0.4;
+    display: none;
+}
+
+#beer-modal {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    z-index: 9999;
+    height: 300px;
+    width: 300px;
+    background-color: white;
+    margin: -150px 0 0 -150px;
+    display: none;
+}
+
+#beer {
+    background: url(payment.png) no-repeat;
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
+    height: 22px;
+    width: 22px;
 }
