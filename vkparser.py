@@ -73,9 +73,7 @@ def save_into_db(statement):
         save_log("save_into_db error: {0}".format(e))
 
 
-def get_unique_groups(params):
-    # params exmpl: "select added, group_id from groups"
-    all_groups_raw = get_out_db(params)
+def get_unique_groups(all_groups_raw):
     all_groups = []
     append = all_groups.append
     for item in all_groups_raw:
@@ -89,7 +87,8 @@ def controller():
     append = processed_groups.append
     while True:
         t = datetime.now()
-        all_groups = get_unique_groups("select added, group_id from groups order by added desc")
+        all_groups_raw = get_out_db("select added, group_id from groups order by added desc")
+        all_groups = get_unique_groups(all_groups_raw)
         try:
             new_id = full_cycle_v2(processed_groups, all_groups)
             if new_id:
@@ -98,10 +97,11 @@ def controller():
             else:
                 print "smth wrong, new_id={0}, len(processed_groups)={1}, len(all_groups)={2}".format(new_id, len(processed_groups), len(all_groups))
                 save_log("smth wrong, new_id={0}, len(processed_groups)={1}, len(all_groups)={2}".format(new_id, len(processed_groups), len(all_groups)))
+                time.sleep(3)
         except Exception as e:
             save_log("full_cycle error: {0}, len(processed_groups)={1}, len(all_groups)={2}".format(e, len(processed_groups), len(all_groups)))
             print "full_cycle error: {0}, len(processed_groups)={1}, len(all_groups)={2}".format(e, len(processed_groups), len(all_groups))
-            time.sleep(1)
+            time.sleep(3)
             
         if len(all_groups) == len(processed_groups):
             print "\nall groups were updated!\n".upper()
@@ -121,8 +121,21 @@ def controller():
             last_update = "{0}:{1}".format(a_h, a_m)
         dt = "{0}".format(a - t)
         dt = dt.split(".")[0]
+
+        # accurate write-in
+        try:
+            f = open(os.getcwd() + '/statistics.txt', 'r')
+            data = json.loads(f.read())
+            f.close()
+        except:
+            data = {}
+        data["totalgroups"] = len(all_groups_raw)
+        data["totalposts"] = 0
+        data["time"] = dt
+        data["last_update"] = last_update
+        
         stat = open(os.getcwd() + '/statistics.txt', 'w')
-        stat.write(json.dumps({"totalgroups": "{0}".format(len(all_groups)), "totalposts": 0, "time": dt, "last_update": last_update}))
+        stat.write(json.dumps(data))
         stat.close()
         print "--"*25
         
@@ -179,10 +192,40 @@ def full_cycle_v2(processed_groups, all_):
             return group_id
     else:
         return group_id
-    print "--OK"
+    print "--OK"     
     save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
     screen_name = get_out_db('select screen_name from groups where group_id = {0}'.format(group_id))[0][0]
     print "screen_name:", screen_name, ", group_id:", group_id, ", nums to parse:", str(count)
+
+    # in this moment update stats-file
+    try:
+        f = open(os.getcwd() + '/statistics.txt', 'r')
+        data = json.loads(f.read())
+        f.close()
+    except:
+        data = {}
+
+    # load group-name...
+    try:
+        req = "https://api.vk.com/method/groups.getById?group_id={0}".format(group_id)
+        written_name = requests.get(req).json()["response"][0]["name"]
+    except Exception as ex:
+        save_log("no written_name: {0}".format(ex))
+        written_name = screen_name
+    print "written_name:", written_name
+
+    if len(written_name) > 32:
+        data["written_name"] = written_name[:32]
+    else:
+        data["written_name"] = written_name
+    data["count"] = count
+    data["link"] = "http://vk.com/" + screen_name
+
+    stat = open(os.getcwd() + '/statistics.txt', 'w')
+    stat.write(json.dumps(data))
+    stat.close()
+
+    # now the main part 
     offset = count//100 + 1
     for i in range(0, offset):
         posts = getA(group_id, auth_token, i*100, 100)
