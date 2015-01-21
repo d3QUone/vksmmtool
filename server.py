@@ -39,35 +39,14 @@ def teardown_request(exception):
 
 @app.route('/', methods = ['GET'])
 def landing_page():
-    error = request.args.get('error')
-    link = url_for('login_save_h')
-    return render_template('landing.html', link = link, error = error)
-
-
-@app.route('/save_h', methods = ['GET'])
-def login_save_h():
-    # parse height
-    width = request.args.get('w')
-    height = request.args.get('h')
-    user_IP = request.remote_addr
-    #print "width = {0}, height = {1}; user_ip = {2}".format(width, height, user_IP)
-    try:
-        g.db.execute("delete from screen_size where user_ip = '{0}'".format(user_IP))
-        g.db.execute("insert into screen_size (user_ip, w, h) values ('{0}', {1}, {2})".format(user_IP, width, height))
-        g.db.commit()
-
-        # redirect to vk auth then, detailed static params below; render link
-        redirect_uri = "http://vksmm.info" + url_for('parse_vk_responce')  #url_for('parse_vk_responce', _external=True)
-        client_id = "4260316"
-        link = "https://oauth.vk.com/authorize?"
-        link += "client_id=" + client_id
-        link += "&scope=groups"
-        link += "&response_type=code&v=5.27"
-        link += "&redirect_uri=" + redirect_uri
-        return redirect(link)
-    except Exception as e:
-        print "/save_h error:", e
-        return "save_h error: {0}".format(e)
+    redirect_uri = "http://vksmm.info" + url_for('parse_vk_responce')
+    client_id = "4260316"
+    link = "https://oauth.vk.com/authorize?"
+    link += "client_id=" + client_id
+    link += "&scope=groups"
+    link += "&response_type=code&v=5.27"
+    link += "&redirect_uri=" + redirect_uri
+    return render_template('landing.html', link = link)
 
 
 # vk auth module -- OK
@@ -180,15 +159,9 @@ def index_page():
             except:
                 offset = 0
 
-            #screen-works here...
             try:
-                user_ip = request.remote_addr
-                res = g.db.execute("select w, h from screen_size where user_ip = '{0}'".format(user_ip)).fetchall()
-                w, h = res[0]
-                # check sizes every time
-
-                #w = int(request.args.get('w'))
-                #h = int(request.args.get('h'))
+                w = int(request.args.get('w'))
+                h = int(request.args.get('h'))
                 
                 cols = int((w*0.8 - 235)/125) #x
                 rows = int((h - 120.0)/120) #y
