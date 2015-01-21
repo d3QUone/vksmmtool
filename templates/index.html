@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <title>VKSMM</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<script>
+    function get_size(obj) {
+        var h = window.innerHeight;
+        var w = window.innerWidth;
+        var main_link = obj.getAttribute("href");
+        obj.href = main_link + "&h=" + h + "&w=" + w;
+    }
+</script>
 </head>
 
 <body>
@@ -20,7 +28,7 @@
         <div id="gl">
             {% if group_list %}
                 {% for group in group_list %}
-                <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ group[0] }}">
+                <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ group[0] }}" id="main_link" onclick="get_size(this);">
                     <div class="gblock">
                         <img class="gblock-pic" src="{{ group[2] }}" alt="group logo"/>
                         <div class="gtitle">{{ group[1] }}</div>
@@ -37,8 +45,9 @@
             <ul>
                 <li>Последнее обновление: {{ stats['last_update'] }}</li>
                 <li>Продолжительность: {{ stats['time'] }}</li>
+                <br>
                 <li>Всего анализировано {{ stats['totalgroups'] }} групп(ы)</li>
-                <li>Всего постов: {{ stats['totalposts'] }}</li>
+                <!--li>Всего постов: {{ stats['totalposts'] }}</li-->
             </ul>
             {% else %}
                 Статистика обновляется...
@@ -56,15 +65,15 @@
                 Сортировать по:
                 {% if sort_type == "like" %}
                 <a href="#"><span class="slike active-sort"></span></a>
-                <a href="{{ base_link }}repo"><span class="srep"></span></a>
-                <a href="{{ base_link }}comm"><span class="scom"></span></a>
+                <a href="{{ base_link }}repo" onclick="get_size(this);"><span class="srep"></span></a>
+                <a href="{{ base_link }}comm" onclick="get_size(this);"><span class="scom"></span></a>
                 {% elif sort_type == "repo" %}
-                <a href="{{ base_link }}like"><span class="slike"></span></a>
+                <a href="{{ base_link }}like" onclick="get_size(this);"><span class="slike"></span></a>
                 <a href="#"><span class="srep active-sort"></span></a>
-                <a href="{{ base_link }}comm"><span class="scom"></span></a>
+                <a href="{{ base_link }}comm" onclick="get_size(this);"><span class="scom"></span></a>
                 {% elif sort_type == "comm" %}
-                <a href="{{ base_link }}like"><span class="slike"></span></a>
-                <a href="{{ base_link }}repo"><span class="srep"></span></a>
+                <a href="{{ base_link }}like" onclick="get_size(this);"><span class="slike"></span></a>
+                <a href="{{ base_link }}repo" onclick="get_size(this);"><span class="srep"></span></a>
                 <a href="#"><span class="scom active-sort"></span></a>
                 {% endif %}
             </div>
@@ -87,11 +96,22 @@
                 </a>
                 {% endfor %}
                 {% else %}
-                Группа закрыта или еще не проанализирована
+                <!--div style="width: 30%;" align=center-->
+                    Эта группа еще не проанализирована.
+                    <br>
+                    На сканирование одной группы с 1000 постов в среднем тратится 40 секунд.
+                    {% if stats %}
+                        <br>
+                        Сканирование последней группы было произведено за {{ stats['time'] }} минут.
+                    {% endif %}
                 {% endif %}
             </div>
   </div>
     <div id="nav-bottom">
+        {% if stats %}
+        <div id="progress">
+            Сейчас сканируется: <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ stats['link'] }}" onclick="get_size(this);">{{ stats['written_name'] }}</a>, {{ stats['count'] }} пост</div>
+        {% endif %}
         {% if offset_next %}
         <a href="{{ offset_next }}" class="button">Вперёд</a>
         {% endif %}
@@ -100,5 +120,33 @@
         {% endif %}
     </div>
 </div>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function (d, w, c) {
+     (w[c] = w[c] || []).push(function() {
+                              try {
+                              w.yaCounter27980823 = new Ya.Metrika({id:27980823,
+                                                                   webvisor:true,
+                                                                   clickmap:true,
+                                                                   trackLinks:true,
+                                                                   accurateTrackBounce:true,
+                                                                   ut:"noindex"});
+                              } catch(e) { }
+                              });
+     
+     var n = d.getElementsByTagName("script")[0],
+     s = d.createElement("script"),
+     f = function () { n.parentNode.insertBefore(s, n); };
+     s.type = "text/javascript";
+     s.async = true;
+     s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+     
+     if (w.opera == "[object Opera]") {
+     d.addEventListener("DOMContentLoaded", f, false);
+     } else { f(); }
+     })(document, window, "yandex_metrika_callbacks");
+    </script>
+<noscript><div><img src="//mc.yandex.ru/watch/27980823?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 </body>
 </html>
