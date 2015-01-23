@@ -8,7 +8,7 @@ import os
 
 
 def save_log(text):
-    # logging - OK
+    # logging & printing - OK
     text = "{0} | {1}\n".format(datetime.now(), text)
     try:
         f = open("logs.txt", "a")
@@ -46,7 +46,7 @@ def getA(group_id, auth_token=None, offset=0, count=100):
             print rjson["error"]
             return {"code": rjson["error"]["error_code"], "message": rjson["error"]["error_msg"]}
     except Exception as e:
-        save_log("Requests error: {0}".format(e))
+        save_log("Requests error: {0}, raw data: {1}".format(e, res.text))
         return {"items": [], "count": 0}
 
 
@@ -73,6 +73,7 @@ def save_into_db(statement):
         save_log("save_into_db error: {0}".format(e))
 
 
+# SMTH WRONG HERE
 def get_unique_groups(sql_request):
     all_groups_raw = get_out_db(sql_request)
     all_groups = []
@@ -80,6 +81,7 @@ def get_unique_groups(sql_request):
     for item in all_groups_raw:
         if item not in all_groups:
             append(item)
+    print "fetched {0} groups".format(len(all_groups))
     return all_groups
 
 
@@ -99,16 +101,15 @@ def controller():
                 append(new_id)
                 print "new_id={0} saved".format(new_id)
             else:
-                print "smth wrong, new_id={0}, len(processed_groups)={1}, len(all_groups)={2}".format(new_id, len(processed_groups), len(all_groups))
-                save_log("smth wrong, new_id={0}, len(processed_groups)={1}, len(all_groups)={2}".format(new_id, len(processed_groups), len(all_groups)))
+                save_log("new_id={0}, len processed={1}, len all={2}".format(new_id, len(processed_groups), len(all_groups)))
                 time.sleep(3)
         except Exception as e:
-            save_log("full_cycle: {0}, len(processed_groups)={1}, len(all_groups)={2}".format(e, len(processed_groups), len(all_groups)))
-            print "full_cycle: {0}, len(processed_groups)={1}, len(all_groups)={2}".format(e, len(processed_groups), len(all_groups))
+            save_log("full_cycle: {0}, len processed={1}, len all={2}".format(e, len(processed_groups), len(all_groups)))
             time.sleep(3)
-            
+
+        # not sure it is ok 
         if len(all_groups) == len(processed_groups):
-            print "\nall groups were updated!\n".upper()
+            save_log("\nall groups were updated! processed: {0}\n".format(len(processed_groups)).upper())
             del processed_groups[:]
 
         # accurate write-in
@@ -136,17 +137,19 @@ def full_cycle_v2(processed_groups, all_):
         try:
             group_id = item[1]
             if group_id not in processed_groups:
-                posts = get_out_db("select link from postinfo where group_id = {0}".format(group_id))
-                if len(posts) == 0: # group is new or closed, anyway - we start with this group
+                posts = get_out_db("select count(*) from postinfo where group_id = {0}".format(group_id))[0][0]
+                if posts == 0:
+                    # group is new or closed, anyway - we start with this group
                     chosen_id = group_id
                     break
-                else: # this group isnt new and was parsed some time ago
+                else:
+                    # this group isnt new and was parsed some time ago
                     i += 1
-                time.sleep(0.01)
-            else: # this group is already parsed
+            else:
+                # this group is already parsed
                 all_groups.pop(i)
         except Exception as e:
-            print "Allert: data error, {0}. Raw: {1}".format(e, item)
+            save_log("Allert: data error, {0}. Raw: {1}".format(e, item))
             
     try:          
         if chosen_id == -1:
@@ -166,7 +169,8 @@ def full_cycle_v2(processed_groups, all_):
     if "count" in ret_keys:
         count = ret["count"]
     elif "code" in ret_keys:
-        print "error_code: {0}\nmessage: {1}\n".format(ret["code"], ret["message"])
+        print "\nrefreshing access_token..."
+        #print "error_code: {0}\nmessage: {1}\n".format(ret["code"], ret["message"])
         user_id = get_out_db("select user_id from groups where group_id = {0} order by added desc".format(group_id))[0][0]
         auth_token = get_out_db("select auth_token from userinfo where user_id = {0}".format(user_id))[0][0]
         ret = getA(group_id, auth_token, 0, 1)        
@@ -183,14 +187,6 @@ def full_cycle_v2(processed_groups, all_):
     screen_name = get_out_db('select screen_name from groups where group_id = {0}'.format(group_id))[0][0]
     print "screen_name:", screen_name, ", group_id:", group_id, ", nums to parse:", str(count)
 
-    # in this moment update stats-file
-    try:
-        f = open(os.getcwd() + '/statistics.txt', 'r')
-        data = json.loads(f.read())
-        f.close()
-    except:
-        data = {}
-
     try:
         req = "https://api.vk.com/method/groups.getById?group_id={0}".format(group_id)
         written_name = requests.get(req).json()["response"][0]["name"]
@@ -199,8 +195,15 @@ def full_cycle_v2(processed_groups, all_):
         written_name = screen_name
     print "name:", written_name
 
-    if len(written_name) > 32:
-        data["name"] = written_name[:32]
+    # in this moment update stats-file
+    try:
+        f = open(os.getcwd() + '/statistics.txt', 'r')
+        data = json.loads(f.read())
+        f.close()
+    except:
+        data = {}
+    if len(written_name) > 35:
+        data["name"] = written_name[:32] + "..."
     else:
         data["name"] = written_name
     data["count"] = count
@@ -210,7 +213,7 @@ def full_cycle_v2(processed_groups, all_):
     stat.write(json.dumps(data))
     stat.close()
 
-    # now the main part 
+    # LOAD AND PROCESS VK-POSTS
     offset = count//100 + 1
     for i in range(0, offset):
         posts = getA(group_id, auth_token, i*100, 100)
@@ -252,7 +255,7 @@ def full_cycle_v2(processed_groups, all_):
         stat.write(json.dumps(data))
         stat.close()
         
-        time.sleep(0.1)
+        time.sleep(0.05)
     return group_id
 
 ver = "2a"
