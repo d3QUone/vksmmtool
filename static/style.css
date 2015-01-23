@@ -64,7 +64,7 @@ a {
     background-color: #4f7195;
     position: absolute;
     top: 40px;
-    bottom: 60px;
+    bottom: 0px;
     min-height: 400px;
 }
 
@@ -423,4 +423,46 @@ a.auth-button {
     bottom: 0px;
     height: 22px;
     width: 22px;
+}
+
+/* updates 23.01 */
+
+#recommend {
+    position: relative;
+    width: 400px;
+    left: 20%;
+    border: 2px solid #4f7195;
+    padding: 15px;
+}
+
+#rec-info {
+    font: 700 15px / 15px Tahoma;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.gtitle-dark {
+    color: #777;
+    font: 700 11px / 13px Tahoma;
+}
+
+.gblock-dark {
+    height: 30px;
+    padding: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gblock-dark-selected {
+    background-color: #dfdfdf;
+}
+
+.gblock-dark:hover {
+    background-color: #dfdfdf;
+}
+
+#rec-stat {
+    font: 700 15px / 15px Tahoma;
+    color: #777;
+    margin-top: 20px;
 }
