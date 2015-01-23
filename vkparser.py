@@ -94,7 +94,7 @@ def controller():
             print "len all = 0,", all_groups
             time.sleep(3)
             all_groups = get_unique_groups("select added, group_id from groups order by added desc")
-        
+
         try:
             new_id = full_cycle_v2(processed_groups, all_groups)
             if new_id:
@@ -106,40 +106,25 @@ def controller():
         except Exception as e:
             save_log("full_cycle: {0}, len processed={1}, len all={2}".format(e, len(processed_groups), len(all_groups)))
             time.sleep(3)
-
         # not sure it is ok 
         if len(all_groups) == len(processed_groups):
             save_log("\nall groups were updated! processed: {0}\n".format(len(processed_groups)).upper())
             del processed_groups[:]
-
-        # accurate write-in
-        try:
-            f = open(os.getcwd() + '/statistics.txt', 'r')
-            data = json.loads(f.read())
-            f.close()
-        except:
-            data = {}
-        data["totalgroups"] = len(all_groups)
-        
-        stat = open(os.getcwd() + '/statistics.txt', 'w')
-        stat.write(json.dumps(data))
-        stat.close()
         print "--"*25
         
 
 # actually scans only 1 group, save parsed groups 
 def full_cycle_v2(processed_groups, all_):
-    all_groups = all_
+    buf_all_groups = list(all_) # AAA FUCK DAT IT IS!
     i = 0
     chosen_id = -1
-    while i < len(all_groups): # ---- check!
-        item = all_groups[i]
+    while i < len(buf_all_groups): 
+        item = buf_all_groups[i]
         try:
             group_id = item[1]
             if group_id not in processed_groups:
                 posts = get_out_db("select count(*) from postinfo where group_id = {0}".format(group_id))[0][0]
                 if posts == 0:
-                    # group is new or closed, anyway - we start with this group
                     chosen_id = group_id
                     break
                 else:
@@ -147,18 +132,17 @@ def full_cycle_v2(processed_groups, all_):
                     i += 1
             else:
                 # this group is already parsed
-                all_groups.pop(i)
+                buf_all_groups.pop(i)
         except Exception as e:
             save_log("Allert: data error, {0}. Raw: {1}".format(e, item))
             
     try:          
         if chosen_id == -1:
-            group_id = all_groups[0][1] # -- first group of leftover
+            group_id = buf_all_groups[0][1] # -- first group of leftover
         else:
             group_id = chosen_id
     except Exception as e:
-        # bad all_groups
-        print "choose_id exception: {0}, all_groups: {1}".format(e, all_groups)
+        print "choose_id exception: {0}, buf_all_groups: {1}".format(e, buf_all_groups)
         return None
     
     auth_token = None
@@ -170,7 +154,6 @@ def full_cycle_v2(processed_groups, all_):
         count = ret["count"]
     elif "code" in ret_keys:
         print "\nrefreshing access_token..."
-        #print "error_code: {0}\nmessage: {1}\n".format(ret["code"], ret["message"])
         user_id = get_out_db("select user_id from groups where group_id = {0} order by added desc".format(group_id))[0][0]
         auth_token = get_out_db("select auth_token from userinfo where user_id = {0}".format(user_id))[0][0]
         ret = getA(group_id, auth_token, 0, 1)        
@@ -182,7 +165,8 @@ def full_cycle_v2(processed_groups, all_):
             return group_id
     else:
         return group_id
-    print "--OK"     
+    print "--OK"
+    save_into_db('update groups set is_old = 1 where group_id = {0}'.format(group_id))
     save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
     screen_name = get_out_db('select screen_name from groups where group_id = {0}'.format(group_id))[0][0]
     print "screen_name:", screen_name, ", group_id:", group_id, ", nums to parse:", str(count)
@@ -195,7 +179,7 @@ def full_cycle_v2(processed_groups, all_):
         written_name = screen_name
     print "name:", written_name
 
-    # in this moment update stats-file
+    # UPDATE GROUP-INFO IN THE STATS
     try:
         f = open(os.getcwd() + '/statistics.txt', 'r')
         data = json.loads(f.read())
@@ -208,10 +192,11 @@ def full_cycle_v2(processed_groups, all_):
         data["name"] = written_name
     data["count"] = count
     data["group_id"] = group_id
-
-    stat = open(os.getcwd() + '/statistics.txt', 'w')
-    stat.write(json.dumps(data))
-    stat.close()
+    data["totalgroups"] = len(all_)
+    
+    f = open(os.getcwd() + '/statistics.txt', 'w')
+    f.write(json.dumps(data))
+    f.close()
 
     # LOAD AND PROCESS VK-POSTS
     offset = count//100 + 1
@@ -244,23 +229,23 @@ def full_cycle_v2(processed_groups, all_):
             except BaseException as ex:
                 save_log("link error: {0}, full post: {1}, full response: {2}".format(ex, post, posts))
                 print "link error: ", ex, "full post: ", post
-        # + update file here
+        # UPDATE POSTs-INFO IN THE STATS
         f = open(os.getcwd() + '/statistics.txt', 'r')
         data = json.loads(f.read())
         f.close()
         data["count"] -= len(posts["items"])
         if data["count"] < 0:
             data["count"] = 0
-        stat = open(os.getcwd() + '/statistics.txt', 'w')
-        stat.write(json.dumps(data))
-        stat.close()
+        f = open(os.getcwd() + '/statistics.txt', 'w')
+        f.write(json.dumps(data))
+        f.close()
         
         time.sleep(0.05)
     return group_id
 
-ver = "2a"
+
+ver = "2b"
 if __name__ == "__main__":
     save_log("vkparser v={0} is running!".format(ver))
-    print "vkparser v={0} is running!".format(ver)
     print "--"*25
     controller()
