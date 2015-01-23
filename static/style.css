@@ -15,7 +15,7 @@ a {
     bottom: 0px;
     top: 0px;
     min-height: 600px;
-    min-width: 500px;
+    min-width: 900px;
     overflow: auto; 
     width: 80%;
     margin: 0px auto 0px 10%;
@@ -430,22 +430,23 @@ a.auth-button {
 
 #recommend {
     position: relative;
-    width: 400px;
-    left: 20%;
-    border: 2px solid #4f7195;
-    padding: 15px;
+    min-width: 400px;
+    width: 33%;
+    left: 30%;
+    background-color: #e9edf1;
+    padding: 10px;
 }
 
 #rec-info {
-    font: 700 15px / 15px Tahoma;
     color: #777;
-    margin-bottom: 10px;
+    font: 600 15px / 15px Tahoma;
+    margin-bottom: 5px;
     height: 40px;
 }
 
 .gtitle-dark {
     color: #777;
-    font: 700 11px / 30px Tahoma;
+    font: 600 11px / 30px Tahoma;
     vertical-align: middle;
 }
 
@@ -467,6 +468,6 @@ a.auth-button {
 #rec-stat {
     font: 700 15px / 15px Tahoma;
     color: #777;
-    margin-top: 15px;
-    height: 15px;
+    margin-top: 10px;
+    height: 20px;
 }
