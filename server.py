@@ -179,10 +179,13 @@ def index_page():
                 recomendation = None
             else:
                 max_range = g.db.execute("select count(*) from groups").fetchall()[0][0]
-                rlimit = int((h - 300)/36.0)  # isn't valid for the first run... add redirect back!
-                if rlimit > max_range:
-                    print "big screen :)"
-                    rlimit = max_range - 1
+                try:
+                    rlimit = int((h - 300)/36.0)  # isn't valid for the first run... add redirect
+                    if rlimit > max_range:
+                        print "big screen :)"
+                        rlimit = max_range - 1
+                except:
+                    rlimit = 13
 
                 roffset = int((max_range-rlimit)*random()) + 1
                 print "recomendations. offset:", roffset, " len groups:", len(groups)
