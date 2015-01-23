@@ -83,11 +83,13 @@
                 {% for post in posts %}
                 <a href="{{ post[3] }}" target="_blank">
                     <div class="ablock"  title="Открыть в ВК">
+                        <div style="height: 50px; overflow: hidden; padding: 0">
                         {% if post[4] == 'None' %}
                         <img class="ablock-pic" src="{{ url_for('static', filename='none.png') }}"/>
                         {% else %}
                         <img class="ablock-pic" src="{{ post[4] }}"/>
                         {% endif %}
+                        </div>
                         <div class="likes"><span class="likes-icon"></span>{{ post[0] }}</div>
                         <div class="rep"><span class="rep-icon"></span>{{ post[1] }}</div>
                         <div class="coms"><span class="coms-icon"></span>{{ post[2] }}</div>
