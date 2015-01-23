@@ -67,7 +67,6 @@ def parse_vk_responce():
             req += "&redirect_uri=" + redirect_uri
             res = requests.get(req).json()
 
-            # personal data
             user_id = res["user_id"]
             access_token = res["access_token"]
 
@@ -139,13 +138,14 @@ def index_page():
             group_list = []
             append = group_list.append
             for name in names: # cut group name til 30 chars
-                buf_group_name = name["name"]
+                buf_group_name = name["name"].replace("&amp;", "&")
+                print buf_group_name
                 if len(buf_group_name) >= 30:
                     buf_group_name = buf_group_name[:27] + "..."
                 
                 append([name["gid"], buf_group_name, name["photo_medium"]])
                 if str(name["gid"]) == str(group_id):
-                    current_group_name = name["name"]
+                    current_group_name = name["name"].replace("&amp;", "&")
                     current_group_picture = name["photo_medium"]
 
             # UPDATE SORTING
@@ -170,9 +170,9 @@ def index_page():
                 cols = int((w*0.8 - 235)/125) #x
                 rows = int((h - 120.0)/120) #y
                 count = rows*cols
-                print "rows = {0}, cols = {1}, count = {2}".format(rows, cols, count)
+                #print "rows = {0}, cols = {1}, count = {2}".format(rows, cols, count)
             except Exception as e:
-                print "w-h error: {0}".format(e)
+                print "first run w-h error: {0}".format(e)
                 count = 35
             posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by {1} desc limit {2} offset {3}".format(group_id, sort_type, count, offset*count)).fetchall()
             if posts:
@@ -188,9 +188,7 @@ def index_page():
                     rlimit = 13
 
                 roffset = int((max_range-rlimit)*random()) + 1
-                print "recomendations. offset:", roffset, " len groups:", len(groups)
-                                                        # where is_old = 1  # <-- add this to production code
-                groups = g.db.execute("select group_id from groups limit {0} offset {1}".format(rlimit, roffset)).fetchall()
+                groups = g.db.execute("select group_id from groups where is_old = 1 order by group_id asc limit {0} offset {1}".format(rlimit, roffset)).fetchall()
                 group_ids = ",".join("{0}".format(group[0]) for group in groups)
                 req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
                 names = requests.get(req).json()["response"]
@@ -203,7 +201,7 @@ def index_page():
                         buf_group_name = buf_group_name[:47] + "..."
                     append([name["gid"], buf_group_name, name["photo_medium"]])
 
-            # load actual username
+            # LOAD USER-DATAS
             try:
                 req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
                 response = requests.get(req).json()["response"]
