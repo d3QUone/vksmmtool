@@ -36,23 +36,22 @@
                 </a>
                 {% endfor %}
             {% else %}
-                You have no groups :(
                 У вас нет групп :(
             {% endif %}
         </div>
-        <div id="stat">
+        <!--div id="stat">
             {% if stats %}
             <ul>
                 <li>Последнее обновление: {{ stats['last_update'] }}</li>
                 <li>Продолжительность: {{ stats['time'] }}</li>
                 <br>
                 <li>Всего анализировано {{ stats['totalgroups'] }} групп(ы)</li>
-                <!--li>Всего постов: {{ stats['totalposts'] }}</li-->
+                <li>Всего постов: {{ stats['totalposts'] }}</li>
             </ul>
             {% else %}
                 Статистика обновляется...
             {% endif %}
-        </div>
+        </div-->
     </div>
     <div id="group-panel">
     	<div id="group-head">
@@ -79,8 +78,8 @@
             </div>
         </div>
         <div id="group-content">
-        	<div id="group-table">
-                {% if posts %}
+            {% if posts %}
+                <div id="group-table">
                 {% for post in posts %}
                 <a href="{{ post[3] }}" target="_blank">
                     <div class="ablock"  title="Открыть в ВК">
@@ -92,25 +91,34 @@
                         <div class="likes"><span class="likes-icon"></span>{{ post[0] }}</div>
                         <div class="rep"><span class="rep-icon"></span>{{ post[1] }}</div>
                         <div class="coms"><span class="coms-icon"></span>{{ post[2] }}</div>
-                    </div>
-                </a>
+                    </div></a>
                 {% endfor %}
-                {% else %}
-                <!--div style="width: 30%;" align=center-->
-                    Эта группа еще не проанализирована.
-                    <br>
-                    На сканирование одной группы с 1000 постов в среднем тратится 40 секунд.
-                    {% if stats %}
+                </div>
+            {% else %}
+                <div id="recommend">
+                    <div id="rec-info">
+                        Эта группа ещё в очереди.
                         <br>
-                        Сканирование последней группы было произведено за {{ stats['time'] }} минут.
-                    {% endif %}
-                {% endif %}
-            </div>
+                        Рекомендуем отвлечься на следующие группы:
+                    </div>
+                    <div id="rec-gl">
+                    {% for group in recomendation %}
+                    <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ group[0] }}" id="main_link" onclick="get_size(this);">
+                        <div class="gblock-dark">
+                            <img class="gblock-pic" src="{{ group[2] }}" alt="group logo"/>
+                            <div class="gtitle-dark">{{ group[1] }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    </div>
+                    <div id="rec-stat">Всего групп в системе: {{ stats['totalgroups'] }}</div>
+                </div>
+            {% endif %}
   </div>
     <div id="nav-bottom">
         {% if stats %}
         <div id="progress">
-            Сейчас сканируется: <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ stats['link'] }}" onclick="get_size(this);">{{ stats['written_name'] }}</a>, {{ stats['count'] }} пост</div>
+            Сейчас сканируется: <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ stats['group_id'] }}" onclick="get_size(this);">{{ stats['name'] }}</a>, осталось {{ stats['count'] }} постов</div>
         {% endif %}
         {% if offset_next %}
         <a href="{{ offset_next }}" class="button">Вперёд</a>
