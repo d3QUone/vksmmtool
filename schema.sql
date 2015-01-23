@@ -17,7 +17,9 @@ create table groups (
   user_id integer not null,
   group_id integer not null,
   screen_name text,
-  picture text
+  picture text,
+  added integer, 
+  is_old integer
 );
 drop table if exists postinfo;
 create table postinfo (
