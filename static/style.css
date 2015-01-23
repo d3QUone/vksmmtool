@@ -70,7 +70,7 @@ a {
 
 .gblock {
 	height: 30px;	
-	padding: 3px;
+	padding: 0px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -92,7 +92,8 @@ a {
 }
 
 .gtitle {
-	font: 700 11px / 13px Tahoma;
+    font: 700 11px / 30px Tahoma;
+    vertical-align: middle;
     color: #e8eff7;
     padding-right: 15px;
 }
@@ -438,12 +439,14 @@ a.auth-button {
 #rec-info {
     font: 700 15px / 15px Tahoma;
     color: #777;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    height: 40px;
 }
 
 .gtitle-dark {
     color: #777;
-    font: 700 11px / 13px Tahoma;
+    font: 700 11px / 30px Tahoma;
+    vertical-align: middle;
 }
 
 .gblock-dark {
@@ -464,5 +467,6 @@ a.auth-button {
 #rec-stat {
     font: 700 15px / 15px Tahoma;
     color: #777;
-    margin-top: 20px;
+    margin-top: 15px;
+    height: 15px;
 }
