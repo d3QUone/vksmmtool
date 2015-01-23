@@ -189,10 +189,8 @@ a {
 }
 
 .ablock-pic {
-    height: 50px;
 	display: block;
-	max-width: 100%;
-    margin: 0 auto;
+	width: 100%;
 }
 
 .ablock div {
