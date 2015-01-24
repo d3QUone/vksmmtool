@@ -139,7 +139,6 @@ def index_page():
             append = group_list.append
             for name in names: # cut group name til 30 chars
                 buf_group_name = name["name"].replace("&amp;", "&")
-                print buf_group_name
                 if len(buf_group_name) >= 30:
                     buf_group_name = buf_group_name[:27] + "..."
                 
@@ -196,7 +195,7 @@ def index_page():
                 recomendation = []
                 append = recomendation.append
                 for name in names: 
-                    buf_group_name = name["name"]
+                    buf_group_name = name["name"].replace("&amp;", "&")
                     if len(buf_group_name) >= 50:
                         buf_group_name = buf_group_name[:47] + "..."
                     append([name["gid"], buf_group_name, name["photo_medium"]])
