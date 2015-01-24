@@ -29,9 +29,14 @@ python
 
 <code>screen python vkparser.py</code>
 
-5) Setup NGNIX-server and Gunicorn, following  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>
+5) Setup NGNIX-server and Gunicorn, following  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>, restart it and run app from the project folder, e.g:
 
-and run it
+```bash
+sudo /etc/init.d/nginx restart
+cd user/vksmmmtool
+screen gunicorn -w 2 -b localhost:8000 server:app
+```
+and Control + A + D to leave screen working
 
 <hr>
 <a href="http://vksmm.info/" target="_blank"><b>Check it </b></a> (http://vk.com/  account is required)
