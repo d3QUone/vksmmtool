@@ -39,19 +39,6 @@
                 У вас нет групп :(
             {% endif %}
         </div>
-        <!--div id="stat">
-            {% if stats %}
-            <ul>
-                <li>Последнее обновление: {{ stats['last_update'] }}</li>
-                <li>Продолжительность: {{ stats['time'] }}</li>
-                <br>
-                <li>Всего анализировано {{ stats['totalgroups'] }} групп(ы)</li>
-                <li>Всего постов: {{ stats['totalposts'] }}</li>
-            </ul>
-            {% else %}
-                Статистика обновляется...
-            {% endif %}
-        </div-->
     </div>
     <div id="group-panel">
     	<div id="group-head">
@@ -123,10 +110,10 @@
             Сейчас сканируется: <a href="{{url_for('index_page')}}?user_id={{ user_id }}&access_token={{ access_token }}&group_id={{ stats['group_id'] }}" onclick="get_size(this);">{{ stats['name'] }}</a>, осталось {{ stats['count'] }} постов</div>
         {% endif %}
         {% if offset_next %}
-        <a href="{{ offset_next }}" class="button">Вперёд</a>
+        <a href="{{ offset_next }}" class="button" onclick="get_size(this);">Вперёд</a>
         {% endif %}
         {% if offset_prev %}
-        <a href="{{ offset_prev }}" class="button button-disabled">Назад</a>
+        <a href="{{ offset_prev }}" class="button button-disabled" onclick="get_size(this);">Назад</a>
         {% endif %}
     </div>
 </div>
