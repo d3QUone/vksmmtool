@@ -75,12 +75,12 @@ def save_into_db(statement):
 
 # SMTH WRONG HERE
 def get_unique_groups(sql_request):
-    all_groups_raw = get_out_db(sql_request)
     all_groups = []
     append = all_groups.append
+    all_groups_raw = get_out_db(sql_request)
     for item in all_groups_raw:
-        if item not in all_groups:
-            append(item)
+        if item[0] not in all_groups:
+            append(item[0])
     print "fetched {0} groups".format(len(all_groups))
     return all_groups
 
@@ -89,11 +89,11 @@ def controller():
     processed_groups = [] 
     append = processed_groups.append
     while True:
-        all_groups = get_unique_groups("select added, group_id from groups order by added desc")
+        all_groups = get_unique_groups("select group_id from groups order by added desc")
         while len(all_groups) == 0:
             print "len all = 0,", all_groups
             time.sleep(3)
-            all_groups = get_unique_groups("select added, group_id from groups order by added desc")
+            all_groups = get_unique_groups("select group_id from groups order by added desc")
 
         try:
             new_id = full_cycle_v2(processed_groups, all_groups)
@@ -101,27 +101,26 @@ def controller():
                 append(new_id)
                 print "new_id={0} saved".format(new_id)
             else:
-                save_log("new_id={0}, len processed={1}, len all={2}".format(new_id, len(processed_groups), len(all_groups)))
+                save_log("ID=None, len processed={0}, len all={1}".format(len(processed_groups), len(all_groups)))
                 time.sleep(3)
         except Exception as e:
             save_log("full_cycle: {0}, len processed={1}, len all={2}".format(e, len(processed_groups), len(all_groups)))
             time.sleep(3)
-        # not sure it is ok 
+        
         if len(all_groups) == len(processed_groups):
-            save_log("\nall groups were updated! processed: {0}\n".format(len(processed_groups)).upper())
+            save_log("\nall groups were parsed! {0} groups total\n".format(len(processed_groups)).upper())
             del processed_groups[:]
         print "--"*25
         
 
 # actually scans only 1 group, save parsed groups 
 def full_cycle_v2(processed_groups, all_):
-    buf_all_groups = list(all_) # AAA FUCK DAT IT IS!
+    buf_all_groups = list(all_)
     i = 0
     chosen_id = -1
     while i < len(buf_all_groups): 
-        item = buf_all_groups[i]
+        group_id = buf_all_groups[i]
         try:
-            group_id = item[1]
             if group_id not in processed_groups:
                 posts = get_out_db("select count(*) from postinfo where group_id = {0}".format(group_id))[0][0]
                 if posts == 0:
@@ -138,7 +137,7 @@ def full_cycle_v2(processed_groups, all_):
             
     try:          
         if chosen_id == -1:
-            group_id = buf_all_groups[0][1] # -- first group of leftover
+            group_id = buf_all_groups[0] # -- first group of leftover
         else:
             group_id = chosen_id
     except Exception as e:
@@ -153,14 +152,14 @@ def full_cycle_v2(processed_groups, all_):
     if "count" in ret_keys:
         count = ret["count"]
     elif "code" in ret_keys:
-        print "\nrefreshing access_token..."
+        print "\nrefreshing access_token...\n"
         user_id = get_out_db("select user_id from groups where group_id = {0} order by added desc".format(group_id))[0][0]
         auth_token = get_out_db("select auth_token from userinfo where user_id = {0}".format(user_id))[0][0]
         ret = getA(group_id, auth_token, 0, 1)        
         if "count" in ret.keys():
             count = int(ret["count"])
         else:
-            print "sorry... error_code={0}, message: {1}".format(ret["code"], ret["message"])
+            print "\nsorry... error_code={0}, message: {1}".format(ret["code"], ret["message"])
             save_log(ret)
             return group_id
     else:
@@ -244,7 +243,7 @@ def full_cycle_v2(processed_groups, all_):
     return group_id
 
 
-ver = "2b"
+ver = "2c"
 if __name__ == "__main__":
     save_log("vkparser v={0} is running!".format(ver))
     print "--"*25
