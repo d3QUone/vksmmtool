@@ -94,35 +94,32 @@ def parse_vk_responce():
             groups = requests.get(req).json()["response"]
             for item in groups:
                 g.db.execute("insert into groups (user_id, group_id, screen_name, picture, added, is_old) values ({0}, {1}, '{2}', '{3}', {4}, 0)".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time())))
-                g.db.commit()
-        
+            g.db.commit()
+            return redirect(url_for('index_page', user_id = user_id, access_token = access_token))
         except Exception as e:
-            print "/vk_login err:", e
-            return "error: {0}".format(e)
-        return redirect(url_for('index_page', user_id = user_id, access_token = access_token))
-    else:
-        return "Something has gone wrong<br><a href='{0}'>go back to login page</a>".format(url_for('vk'))
+            print "/vk_login err:", e, "res:", res
+    return redirect(url_for('landing_page')) # add an error-message here ?
 
 
 # main page
 @app.route('/index', methods = ['GET'])
 def index_page():
-    access_token = request.args.get('access_token')
-    user_id = request.args.get('user_id')
     try:
-        user_id = int(user_id)
+        user_id = int(request.args.get('user_id'))
     except:
-        # may be render link here? 
-        return "'user_id' error: int expected"
-    group_id = request.args.get('group_id')
-    offset = request.args.get('offset')
+        return redirect(url_for('landing_page')) # add an error-message here ? "'user_id' error: int expected"
+    try:
+        offset = int(request.args.get('offset'))
+    except:
+        offset = 0 
     sort_type = request.args.get('sort_type')
+    access_token = request.args.get('access_token')
     if user_id and access_token:
         try:
             groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
             try:
-                group_id = int(group_id)
-            except Exception as e:
+                group_id = int(request.args.get('group_id'))
+            except:
                 group_id = groups[0][0]
 
             group_ids = ",".join("{0}".format(group[0]) for group in groups)
@@ -158,11 +155,6 @@ def index_page():
                 sort_type = res[0][0]
 
             try:
-                offset = int(offset)
-            except:
-                offset = 0
-
-            try:
                 w = int(request.args.get('w'))
                 h = int(request.args.get('h'))
                 
@@ -171,7 +163,7 @@ def index_page():
                 count = rows*cols
                 #print "rows = {0}, cols = {1}, count = {2}".format(rows, cols, count)
             except Exception as e:
-                print "first run w-h error: {0}".format(e)
+                print "w-h error: {0}".format(e)
                 count = 35
             posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by {1} desc limit {2} offset {3}".format(group_id, sort_type, count, offset*count)).fetchall()
             if posts:
@@ -234,9 +226,8 @@ def index_page():
                                    offset_prev = offset_prev, offset_next = offset_next, offset = offset, base_link = base_link, stats = stats,
                                    group_id = group_id, count_postinfo = count_postinfo, sort_type = sort_type, recomendation = recomendation)
         except Exception as e:
-            return "Exception (index_page): {0}".format(e)
-    else:
-        return "'user_id' and 'access_token' were expected"
+            print "Exception (index_page): {0}".format(e)
+    return redirect(url_for('landing_page')) 
 
 
 @app.errorhandler(404)
