@@ -1,3 +1,4 @@
+# coding:utf8
 from flask import Flask, render_template, url_for, make_response, redirect, jsonify, request, g
 from contextlib import closing
 from datetime import datetime
@@ -7,6 +8,11 @@ import sqlite3
 import json
 import os
 from random import random
+import traceback
+import sys
+
+reload(sys) # prepare coding
+sys.setdefaultencoding('utf8')
 
 app = Flask(__name__)
 app.config.update(
@@ -70,7 +76,7 @@ def parse_vk_responce():
             user_id = res["user_id"]
             access_token = res["access_token"]
 
-            # load old sorting ...
+            # LOAD OLD SORTING
             res = g.db.execute("select sort_type from userinfo where user_id = {0}".format(user_id)).fetchall()
             try:
                 sort_type = res[0][0]
@@ -79,25 +85,42 @@ def parse_vk_responce():
             except:
                 sort_type = 'like'
 
+            # LOAD USER-DATAS
+            try:
+                req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
+                response = requests.get(req).json()["response"]
+                username = response["name"] 
+                picture = response["picture"] # avatar 100px
+            except Exception as e:
+                print "load user-datas:", e
+                username = " "
+                picture = None
+            print username
+            
             # delete old personal data first + save new 
             g.db.execute("delete from userinfo where user_id = {0}".format(user_id))
             g.db.execute("delete from groups where user_id = {0}".format(user_id))
-            g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen) values ({0}, '{1}', '{2}', '{3}')".format(int(user_id), access_token, sort_type, datetime.now()))
+            g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen, username, picture) values ({0}, '{1}', '{2}', '{3}', '{4}', '{5}')".format(int(user_id), access_token, sort_type, datetime.now(), username, picture))
             g.db.commit()
             
             # load fresh groups from account; 
             req = "https://api.vk.com/method/execute.get_all_groups?access_token=" + access_token
             buf = requests.get(req).json()["response"]
-            group_ids = ",".join(str(xi) for xi in buf)
+            group_ids = ",".join("{0}".format(xi) for xi in buf)
             
             req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_ids)
             groups = requests.get(req).json()["response"]
             for item in groups:
-                g.db.execute("insert into groups (user_id, group_id, screen_name, picture, added, is_old) values ({0}, {1}, '{2}', '{3}', {4}, 0)".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time())))
+                groupname = item["name"].replace('"', "&quot;").replace("'", "&#39;")
+                try:
+                    g.db.execute("insert into groups (user_id, group_id, screen_name, picture, added, is_old, groupname) values ({0}, {1}, '{2}', '{3}', {4}, 0, '{5}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), groupname))
+                except:
+                    print "sql:", "insert into groups (user_id, group_id, screen_name, picture, added, is_old, groupname) values ({0}, {1}, '{2}', '{3}', {4}, 0, '{5}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), groupname)
             g.db.commit()
             return redirect(url_for('index_page', user_id = user_id, access_token = access_token))
         except Exception as e:
-            print "/vk_login err:", e, "res:", res
+            print "/vk_login err:", e
+            print format_exception(e)
     return redirect(url_for('landing_page')) # add an error-message here ?
 
 
@@ -116,34 +139,32 @@ def index_page():
     access_token = request.args.get('access_token')
     if user_id and access_token:
         try:
-            groups = g.db.execute("select group_id from groups where user_id = {0}".format(user_id)).fetchall()
+            groups = g.db.execute("select group_id, groupname, picture from groups where user_id = {0}".format(user_id)).fetchall()
             try:
                 group_id = int(request.args.get('group_id'))
             except:
                 group_id = groups[0][0]
-
-            group_ids = ",".join("{0}".format(group[0]) for group in groups)
-            if group_ids.find(str(group_id)) == -1:
-                group_ids += ",{0}".format(group_id)
             
-            req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
-            names = requests.get(req).json()["response"]
-
-            # way to get data for loaded group
             current_group_name = None
             current_group_picture = None
             group_list = []
             append = group_list.append
-            for name in names: # cut group name til 30 chars
-                buf_group_name = name["name"].replace("&amp;", "&")
+            for item in groups: 
+                buf_group_name = item[1].replace("&amp;", "&").replace("&quot;", '"').replace("&#39;", "'")
                 if len(buf_group_name) >= 30:
                     buf_group_name = buf_group_name[:27] + "..."
                 
-                append([name["gid"], buf_group_name, name["photo_medium"]])
-                if str(name["gid"]) == str(group_id):
-                    current_group_name = name["name"].replace("&amp;", "&")
-                    current_group_picture = name["photo_medium"]
-
+                append([item[0], buf_group_name, item[2]])
+                if int(item[0]) == int(group_id):
+                    current_group_name = item[1].replace("&amp;", "&").replace("&quot;", '"').replace("&#39;", "'")
+                    current_group_picture = item[2]
+            if not current_group_name and not current_group_picture:
+                # then load from vk
+                req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_id)
+                other_group_data = requests.get(req).json()["response"][0]
+                current_group_name = other_group_data["name"].replace("&amp;", "&").replace("&quot;", '"').replace("&#39;", "'")
+                current_group_picture = other_group_data["photo_medium"]
+            
             # UPDATE SORTING
             if sort_type in ['like', 'repo', 'comm']:
                 g.db.execute("update userinfo set sort_type = '{0}', last_seen = '{1}' where user_id = {2}".format(sort_type, datetime.now(), user_id))
@@ -161,7 +182,6 @@ def index_page():
                 cols = int((w*0.8 - 235)/125) #x
                 rows = int((h - 120.0)/120) #y
                 count = rows*cols
-                #print "rows = {0}, cols = {1}, count = {2}".format(rows, cols, count)
             except Exception as e:
                 print "w-h error: {0}".format(e)
                 count = 35
@@ -169,7 +189,7 @@ def index_page():
             if posts:
                 recomendation = None
             else:
-                max_range = g.db.execute("select count(*) from groups").fetchall()[0][0]
+                max_range = g.db.execute("select count(*) from groups where is_old = 1").fetchall()[0][0]
                 try:
                     rlimit = int((h - 300)/36.0)  # isn't valid for the first run... add redirect
                     if rlimit > max_range:
@@ -177,30 +197,19 @@ def index_page():
                         rlimit = max_range - 1
                 except:
                     rlimit = 13
-
                 roffset = int((max_range-rlimit)*random()) + 1
-                groups = g.db.execute("select group_id from groups where is_old = 1 order by group_id asc limit {0} offset {1}".format(rlimit, roffset)).fetchall()
-                group_ids = ",".join("{0}".format(group[0]) for group in groups)
-                req = "https://api.vk.com/method/groups.getById?group_ids=" + group_ids
-                names = requests.get(req).json()["response"]
-
+                groups = g.db.execute("select group_id, groupname, picture from groups where is_old = 1 order by group_id asc limit {0} offset {1}".format(rlimit, roffset)).fetchall()
+                
                 recomendation = []
                 append = recomendation.append
-                for name in names: 
-                    buf_group_name = name["name"].replace("&amp;", "&")
-                    if len(buf_group_name) >= 50:
-                        buf_group_name = buf_group_name[:47] + "..."
-                    append([name["gid"], buf_group_name, name["photo_medium"]])
-
-            # LOAD USER-DATAS
-            try:
-                req = "https://api.vk.com/method/execute.name_pic?access_token={0}&id={1}".format(access_token, user_id)
-                response = requests.get(req).json()["response"]
-                user_name = response["name"]
-                avatar = response["picture"] # avatar 100px
-            except:
-                user_name = " "
-                avatar = None
+                for item in groups:
+                    try:
+                        buf_group_name = item[1].replace("&amp;", "&").replace("&quot;", '"').replace("&#39;", "'")
+                        if len(buf_group_name) >= 50:
+                            buf_group_name = buf_group_name[:47] + "..."
+                        append([item[0], buf_group_name, item[2]])
+                    except:
+                        pass
 
             # PAGE-NAVIGATION LINKS
             offset_prev = None
@@ -214,6 +223,11 @@ def index_page():
 
             base_link = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}&sort_type=".format(user_id, access_token, group_id, offset)
 
+            # LOAD USER DATA
+            userdata = g.db.execute("select username, picture from userinfo where user_id = {0}".format(user_id)).fetchall()[0]
+            user_name = userdata[0]
+            avatar = userdata[1]
+            
             # finaly load stats
             try:
                 f = open("statistics.txt", "r")
@@ -226,13 +240,26 @@ def index_page():
                                    offset_prev = offset_prev, offset_next = offset_next, offset = offset, base_link = base_link, stats = stats,
                                    group_id = group_id, count_postinfo = count_postinfo, sort_type = sort_type, recomendation = recomendation)
         except Exception as e:
-            print "Exception (index_page): {0}".format(e)
+            print "Exception (index_page):\n", format_exception(e)
     return redirect(url_for('landing_page')) 
 
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'code': 404, 'error': 'Page not found', 'message': "{0}".format(error)}), 404)
+
+
+# tracing the error in the caugth exception
+def format_exception(e):
+    exception_list = traceback.format_stack()
+    exception_list = exception_list[:-2]
+    exception_list.extend(traceback.format_tb(sys.exc_info()[2]))
+    exception_list.extend(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1]))
+    exception_str = "Traceback (most recent call last):\n"
+    exception_str += "".join(exception_list)
+    # Removing the last \n
+    exception_str = exception_str[:-1]
+    return exception_str
 
 
 if __name__ == '__main__':
