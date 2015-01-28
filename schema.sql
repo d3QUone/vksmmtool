@@ -7,6 +7,7 @@ create table screen_size (
 drop table if exists userinfo;
 create table userinfo (
   user_id integer not null,
+  username text, 
   picture text,
   auth_token text,
   last_seen text,
@@ -17,6 +18,7 @@ create table groups (
   user_id integer not null,
   group_id integer not null,
   screen_name text,
+  groupname text, 
   picture text,
   added integer, 
   is_old integer
