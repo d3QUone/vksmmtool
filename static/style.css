@@ -390,6 +390,10 @@ a.auth-button {
     color: #777;
 }
 
+#progress a {
+    color: #42658B;
+}
+
 #overlap {
     height: 100%;
     width: 100%;
