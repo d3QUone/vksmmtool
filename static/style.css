@@ -130,10 +130,10 @@ a {
 { display: inline-block;}
 
 #group-head span {
+    width: 300px;
 	color: #42658b;
     font: 700 12px / 22px Tahoma;
     padding: 5px;
-    width: 300px;
     margin-left: 65px;
     display: block
 }
