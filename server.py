@@ -46,14 +46,32 @@ def teardown_request(exception):
 
 @app.route('/', methods = ['GET'])
 def landing_page():
-    redirect_uri = "http://vksmm.info" + url_for('parse_vk_responce')
-    client_id = "4260316"
-    link = "https://oauth.vk.com/authorize?"
-    link += "client_id=" + client_id
-    link += "&scope=groups"
-    link += "&response_type=code&v=5.27"
-    link += "&redirect_uri=" + redirect_uri
-    return render_template('landing.html', link = link)
+    return render_template('landing.html', link = url_for('login_save_h'))
+
+
+@app.route('/save_h', methods = ['GET'])
+def login_save_h():
+    # parse height
+    width = request.args.get('w')
+    height = request.args.get('h')
+    user_IP = request.remote_addr
+    print "width = {0}, height = {1}; user_ip = {2}".format(width, height, user_IP)
+    try:
+        g.db.execute("delete from screen_size where user_ip = '{0}'".format(user_IP))
+        g.db.execute("insert into screen_size (user_ip, w, h) values ('{0}', {1}, {2})".format(user_IP, width, height))
+        g.db.commit()
+        # redirect to vk auth then, detailed static params below
+        redirect_uri = "http://vksmm.info" + url_for('parse_vk_responce')
+        client_id = "4260316"
+        link = "https://oauth.vk.com/authorize?"
+        link += "client_id=" + client_id
+        link += "&scope=groups"
+        link += "&response_type=code&v=5.27"
+        link += "&redirect_uri=" + redirect_uri
+        return redirect(link)
+    except Exception as e:
+        print "/save_h error:\n", format_exception(e)
+        return redirect(url_for('landing_page'))
 
 
 # vk auth module -- OK
@@ -95,7 +113,7 @@ def parse_vk_responce():
                 print "load user-datas:", e
                 username = " "
                 picture = None
-            print username
+            print "+", username, "online"
             
             # delete old personal data first + save new 
             g.db.execute("delete from userinfo where user_id = {0}".format(user_id))
@@ -178,12 +196,15 @@ def index_page():
             try:
                 w = int(request.args.get('w'))
                 h = int(request.args.get('h'))
-                
+            except:
+                user_IP = request.remote_addr
+                sizes = g.db.execute("select w, h from screen_size where user_ip = '{0}'".format(user_IP)).fetchall()
+                w, h = sizes[0]
+            try:
                 cols = int((w*0.8 - 235)/125) #x
                 rows = int((h - 120.0)/120) #y
                 count = rows*cols
-            except Exception as e:
-                print "w-h error: {0}".format(e)
+            except:
                 count = 35
             posts = g.db.execute("select like, repo, comm, link, picture from postinfo where group_id = {0} order by {1} desc limit {2} offset {3}".format(group_id, sort_type, count, offset*count)).fetchall()
             if posts:
@@ -195,7 +216,8 @@ def index_page():
                     if rlimit > max_range:
                         print "big screen :)"
                         rlimit = max_range - 1
-                except:
+                except Exception as e:
+                    print "rlimit e:", e
                     rlimit = 13
                 roffset = int((max_range-rlimit)*random()) + 1
                 groups = g.db.execute("select group_id, groupname, picture from groups where is_old = 1 order by group_id asc limit {0} offset {1}".format(rlimit, roffset)).fetchall()
@@ -207,7 +229,8 @@ def index_page():
                         buf_group_name = item[1].replace("&amp;", "&").replace("&quot;", '"').replace("&#39;", "'")
                         if len(buf_group_name) >= 50:
                             buf_group_name = buf_group_name[:47] + "..."
-                        append([item[0], buf_group_name, item[2]])
+                        if [item[0], buf_group_name, item[2]] not in recomendation:
+                            append([item[0], buf_group_name, item[2]])
                     except:
                         pass
 
