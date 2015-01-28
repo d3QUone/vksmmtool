@@ -1,9 +1,17 @@
 <!Doctype html>
 <html>
 <head>
-    <meta charset="utf-8">
-	<title>VKSMM</title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<meta charset="utf-8">
+<title>VKSMM</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<script>
+    function get_size(obj) {
+        var h = window.innerHeight;
+        var w = window.innerWidth;
+        var main_link = obj.getAttribute("href");
+        obj.href = main_link + "?h=" + h + "&w=" + w;
+    }
+</script>
 </head>
 <body style="background-color: #6383a8">
 	<div id="land">
@@ -25,7 +33,7 @@
 
                     <p>Сервис не хранит персональную информацию: вся предоставляемая информация берется из открытых источников посредством API ВКонтакте и принадлежит её владельцам и ВКонтакте</p>
             </div>
-                <a id="main_link" class="button auth-button" href="{{ link }}">Войти через ВК</a>
+                <a id="main_link" class="button auth-button" href="{{ link }}" onclick="get_size(this);">Войти через ВК</a>
                 
 		</div>
     </div>
