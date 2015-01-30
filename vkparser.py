@@ -108,13 +108,15 @@ def controller():
             time.sleep(3)
         
         if len(all_groups) == len(processed_groups):
-            save_log("\nall groups were parsed! {0} groups total\n".format(len(processed_groups)).upper())
+            print "--"*25, "\n"
+            save_log("all groups were parsed! {0} groups total".format(len(processed_groups)).upper())
             del processed_groups[:]
         print "--"*25
         
 
 # actually scans only 1 group, save parsed groups 
 def full_cycle_v2(processed_groups, all_):
+    test_time = time.time()
     buf_all_groups = list(all_)
     i = 0
     chosen_id = -1
@@ -130,11 +132,11 @@ def full_cycle_v2(processed_groups, all_):
                     # this group isnt new and was parsed some time ago
                     i += 1
             else:
-                # this group is already parsed
                 buf_all_groups.pop(i)
         except Exception as e:
             save_log("Allert: data error, {0}. Raw: {1}".format(e, item))
-            
+    print "sorting took", int(time.time() - test_time), "sec"
+    
     try:          
         if chosen_id == -1:
             group_id = buf_all_groups[0] # -- first group of leftover
@@ -164,6 +166,11 @@ def full_cycle_v2(processed_groups, all_):
             return group_id
     else:
         return group_id
+    '''
+    if count == 0:
+        save_into_db("delete from groups where group_id = {0}".format(group_id))
+        print "group is empty, delete" 
+    '''
     print "--OK"
     save_into_db('update groups set is_old = 1 where group_id = {0}'.format(group_id))
     save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
@@ -238,12 +245,33 @@ def full_cycle_v2(processed_groups, all_):
         f = open(os.getcwd() + '/statistics.txt', 'w')
         f.write(json.dumps(data))
         f.close()
-        
         time.sleep(0.05)
+
+    # now load datas back and save only best 300
+    limit = 100 # x3 = 300
+    if count > limit*3.1:
+        ts = time.time()
+        bestlikes = get_out_db("select (group_id, link, like, comm, repo, picture) from postinfo where group_id = {0} order by like desc limit {1} offset 0".format(group_id, limit))
+        bestrepos = get_out_db("select (group_id, link, like, comm, repo, picture) from postinfo where group_id = {0} order by repo desc limit {1} offset 0".format(group_id, limit))
+        bestcomms = get_out_db("select (group_id, link, like, comm, repo, picture) from postinfo where group_id = {0} order by comm desc limit {1} offset 0".format(group_id, limit))
+        save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
+
+        toti = 0
+        bestdatas = []
+        append = bestdatas.append
+        for post in bestlikes + bestrepos + bestcomms:
+            if post not in bestdatas:
+                toti += 1
+                append(post)
+                save_into_db("insert into postinfo (group_id, link, like, comm, repo, picture) values ({0}, '{1}', {2}, {3}, {4}, '{5}')".format(post[0], post[1], post[2], post[3], post[4], post[5]))
+                time.sleep(0.05)
+        print int(time.time() - t), "seconds to resave", toti, "posts"
+    else:
+        print "no re-save needed"
     return group_id
 
 
-ver = "2c"
+ver = "3a"
 if __name__ == "__main__":
     save_log("vkparser v={0} is running!".format(ver))
     print "--"*25
