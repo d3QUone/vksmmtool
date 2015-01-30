@@ -1,9 +1,5 @@
-<!Doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>VKSMM</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+{% extends "layout.html" %}
+{% block script %}
 <script>
     function get_size(obj) {
         var h = window.innerHeight;
@@ -12,7 +8,8 @@
         obj.href = main_link + "?h=" + h + "&w=" + w;
     }
 </script>
-</head>
+{% endblock %}
+{% block body %}
 <body style="background-color: #6383a8">
 	<div id="land">
         <div id="slideshow">
@@ -46,7 +43,8 @@
                                                                    webvisor:true,
                                                                    clickmap:true,
                                                                    trackLinks:true,
-                                                                   accurateTrackBounce:true});
+                                                                   accurateTrackBounce:true,
+                                                                   ut:"noindex"});
                               } catch(e) { }
                               });
      
@@ -65,4 +63,4 @@
 <noscript><div><img src="//mc.yandex.ru/watch/27980823?ut=noindex" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
 </body>
-</html>
+{% endblock %}
