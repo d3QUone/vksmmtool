@@ -116,27 +116,18 @@ def controller():
 
 # actually scans only 1 group, save parsed groups 
 def full_cycle_v2(processed_groups, all_):
-    test_time = time.time()
     buf_all_groups = list(all_)
     i = 0
     chosen_id = -1
     while i < len(buf_all_groups): 
-        group_id = buf_all_groups[i]
         try:
+            group_id = buf_all_groups[i]
             if group_id not in processed_groups:
-                posts = get_out_db("select count(*) from postinfo where group_id = {0}".format(group_id))[0][0]
-                if posts == 0:
-                    chosen_id = group_id
-                    break
-                else:
-                    # this group isnt new and was parsed some time ago
-                    i += 1
+                break
             else:
                 buf_all_groups.pop(i)
         except Exception as e:
             save_log("Allert: data error, {0}. Raw: {1}".format(e, item))
-    print "sorting took", int(time.time() - test_time), "sec"
-    
     try:          
         if chosen_id == -1:
             group_id = buf_all_groups[0] # -- first group of leftover
@@ -166,11 +157,6 @@ def full_cycle_v2(processed_groups, all_):
             return group_id
     else:
         return group_id
-    '''
-    if count == 0:
-        save_into_db("delete from groups where group_id = {0}".format(group_id))
-        print "group is empty, delete" 
-    '''
     print "--OK"
     save_into_db('update groups set is_old = 1 where group_id = {0}'.format(group_id))
     save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
@@ -251,9 +237,9 @@ def full_cycle_v2(processed_groups, all_):
     limit = 100 # x3 = 300
     if count > limit*3.1:
         ts = time.time()
-        bestlikes = get_out_db("select (group_id, link, like, comm, repo, picture) from postinfo where group_id = {0} order by like desc limit {1} offset 0".format(group_id, limit))
-        bestrepos = get_out_db("select (group_id, link, like, comm, repo, picture) from postinfo where group_id = {0} order by repo desc limit {1} offset 0".format(group_id, limit))
-        bestcomms = get_out_db("select (group_id, link, like, comm, repo, picture) from postinfo where group_id = {0} order by comm desc limit {1} offset 0".format(group_id, limit))
+        bestlikes = get_out_db("select group_id, link, like, comm, repo, picture from postinfo where group_id = {0} order by like desc limit {1}".format(group_id, limit))
+        bestrepos = get_out_db("select group_id, link, like, comm, repo, picture from postinfo where group_id = {0} order by repo desc limit {1}".format(group_id, limit))
+        bestcomms = get_out_db("select group_id, link, like, comm, repo, picture from postinfo where group_id = {0} order by comm desc limit {1}".format(group_id, limit))
         save_into_db('delete from postinfo where group_id = {0}'.format(group_id))
 
         toti = 0
@@ -264,8 +250,8 @@ def full_cycle_v2(processed_groups, all_):
                 toti += 1
                 append(post)
                 save_into_db("insert into postinfo (group_id, link, like, comm, repo, picture) values ({0}, '{1}', {2}, {3}, {4}, '{5}')".format(post[0], post[1], post[2], post[3], post[4], post[5]))
-                time.sleep(0.05)
-        print int(time.time() - t), "seconds to resave", toti, "posts"
+                time.sleep(0.03)
+        print int(time.time() - ts), "seconds to resave", toti, "posts"
     else:
         print "no re-save needed"
     return group_id
