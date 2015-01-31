@@ -160,10 +160,14 @@ def full_cycle_v2(processed_groups, all_):
     save_into_db("delete from postinfo where group_id = {0}".format(group_id))
     screen_name = get_out_db("select screen_name from groups where group_id = {0}".format(group_id))[0][0]
     print "screen_name:", screen_name, ", group_id:", group_id, ", nums to parse:", str(count)
+    if count > 30000 or count == 0:
+        save_into_db("delete from groups where group_id = {0}".format(group_id))
+        print "removing this group from queue"
+        return group_id
 
     try:
         req = "https://api.vk.com/method/groups.getById?group_id={0}".format(group_id)
-        written_name = requests.get(req).json()["response"][0]["name"]
+        written_name = requests.get(req).json()["response"][0]["name"].replace("&amp;", "&")
     except Exception as ex:
         save_log("no written_name: {0}".format(ex))
         written_name = screen_name
