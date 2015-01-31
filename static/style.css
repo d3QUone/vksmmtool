@@ -126,11 +126,13 @@ a {
     right: 0px;
 }
 
-#group-head #g-info
-{ display: inline-block;}
+#group-head #g-info {
+    display: inline-block;
+    width: 500px;
+}
 
 #group-head span {
-    width: 300px;
+    width: 440px;
 	color: #42658b;
     font: 700 12px / 22px Tahoma;
     padding: 5px;
