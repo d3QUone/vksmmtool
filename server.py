@@ -120,21 +120,36 @@ def parse_vk_responce():
             g.db.execute("delete from groups where user_id = {0}".format(user_id))
             g.db.execute("insert into userinfo (user_id, auth_token, sort_type, last_seen, username, picture) values ({0}, '{1}', '{2}', '{3}', '{4}', '{5}')".format(int(user_id), access_token, sort_type, datetime.now(), username, picture))
             g.db.commit()
-            
-            # load fresh groups from account; 
-            req = "https://api.vk.com/method/execute.get_all_groups?access_token=" + access_token
-            buf = requests.get(req).json()["response"]
-            group_ids = ",".join("{0}".format(xi) for xi in buf)
-            
-            req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_ids)
-            groups = requests.get(req).json()["response"]
-            for item in groups:
-                groupname = item["name"].replace('"', "&quot;").replace("'", "&#39;")
-                try:
-                    g.db.execute("insert into groups (user_id, group_id, screen_name, picture, added, is_old, groupname) values ({0}, {1}, '{2}', '{3}', {4}, 0, '{5}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), groupname))
-                except:
-                    print "sql:", "insert into groups (user_id, group_id, screen_name, picture, added, is_old, groupname) values ({0}, {1}, '{2}', '{3}', {4}, 0, '{5}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), groupname)
-            g.db.commit()
+
+            try:
+                # load fresh groups from account; 
+                req = "https://api.vk.com/method/execute.get_all_groups?access_token=" + access_token
+                buf = requests.get(req).json()["response"]
+                
+                len_buf = len(buf)
+                limit = 100
+                steps = len_buf // limit + 1
+                for st in range(steps):
+                    offset = st*limit
+                    i = offset
+                    group_ids = ""
+                    while i < offset + limit and i < len_buf:
+                        group_ids += "{0},".format(buf[i])
+                        i += 1
+
+                    req = "https://api.vk.com/method/groups.getById?group_ids={0}".format(group_ids[:-1])
+                    groups = requests.get(req)
+                    groups_json = groups.json()["response"]
+
+                    for item in groups_json:
+                        groupname = item["name"].replace('"', "&quot;").replace("'", "&#39;")
+                        try:
+                            g.db.execute("insert into groups (user_id, group_id, screen_name, picture, added, is_old, groupname) values ({0}, {1}, '{2}', '{3}', {4}, 0, '{5}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), groupname))
+                        except:
+                            print "sql:", "insert into groups (user_id, group_id, screen_name, picture, added, is_old, groupname) values ({0}, {1}, '{2}', '{3}', {4}, 0, '{5}')".format(int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), groupname)
+                    g.db.commit()
+            except Exception as e:
+                print format_exception(e)                
             return redirect(url_for('index_page', user_id = user_id, access_token = access_token))
         except Exception as e:
             print "/vk_login err:", e
@@ -263,7 +278,8 @@ def index_page():
                                    offset_prev = offset_prev, offset_next = offset_next, offset = offset, base_link = base_link, stats = stats,
                                    group_id = group_id, count_postinfo = count_postinfo, sort_type = sort_type, recomendation = recomendation)
         except Exception as e:
-            print "Exception (index_page):\n", format_exception(e)
+            print "Exception (index_page):", e
+            #print "Exception (index_page):\n", format_exception(e)
     return redirect(url_for('landing_page')) 
 
 
