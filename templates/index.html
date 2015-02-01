@@ -41,7 +41,11 @@
             <div id="g-info">
                 <img id="logo" src="{{ current_group_picture }}" alt="gropu logo"/>
                 <span>{{ current_group_name }}</span>
-                <p>Всего постов: {{ count_postinfo }}</p>
+                {% if count_postinfo == 0 %}
+                    <p>Не сканировалась</p>
+                {% else %}
+                    <p>Выбрано постов: {{ count_postinfo }}</p>
+                {% endif %}
             </div>
             <div id="sort">
                 Сортировать по:
