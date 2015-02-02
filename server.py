@@ -55,7 +55,6 @@ def login_save_h():
     width = request.args.get('w')
     height = request.args.get('h')
     user_IP = request.remote_addr
-    print "width = {0}, height = {1}; user_ip = {2}".format(width, height, user_IP)
     try:
         g.db.execute("delete from screen_size where user_ip = '{0}'".format(user_IP))
         g.db.execute("insert into screen_size (user_ip, w, h) values ('{0}', {1}, {2})".format(user_IP, width, height))
@@ -152,8 +151,7 @@ def parse_vk_responce():
                 print format_exception(e)                
             return redirect(url_for('index_page', user_id = user_id, access_token = access_token))
         except Exception as e:
-            print "/vk_login err:", e
-            print format_exception(e)
+            print "/vk_login err:", format_exception(e)
     return redirect(url_for('landing_page')) # add an error-message here ?
 
 
@@ -215,9 +213,10 @@ def index_page():
                 user_IP = request.remote_addr
                 sizes = g.db.execute("select w, h from screen_size where user_ip = '{0}'".format(user_IP)).fetchall()
                 w, h = sizes[0]
+                print "width = {0}, height = {1}; user_ip = {2}".format(w, h, user_IP)
             try:
                 cols = int((w*0.8 - 235)/125) #x
-                rows = int((h - 120.0)/120) #y
+                rows = int((h - 120.0)/120)   #y
                 count = rows*cols
             except:
                 count = 35
@@ -227,7 +226,7 @@ def index_page():
             else:
                 max_range = g.db.execute("select count(*) from groups where is_old = 1").fetchall()[0][0]
                 try:
-                    rlimit = int((h - 300)/36.0)  # isn't valid for the first run... add redirect
+                    rlimit = int((h - 300)/36.0)
                     if rlimit > max_range:
                         print "big screen :)"
                         rlimit = max_range - 1
@@ -278,8 +277,7 @@ def index_page():
                                    offset_prev = offset_prev, offset_next = offset_next, offset = offset, base_link = base_link, stats = stats,
                                    group_id = group_id, count_postinfo = count_postinfo, sort_type = sort_type, recomendation = recomendation)
         except Exception as e:
-            print "Exception (index_page):", e
-            #print "Exception (index_page):\n", format_exception(e)
+            print "Exception (index_page):\n", format_exception(e)
     return redirect(url_for('landing_page')) 
 
 
