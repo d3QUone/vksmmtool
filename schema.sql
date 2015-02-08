@@ -1,24 +1,17 @@
-drop table if exists screen_size;
-create table screen_size (
-  user_ip text,
-  w integer,
-  h integer
-);
 drop table if exists userinfo;
 create table userinfo (
   user_id integer not null,
-  username text, 
-  picture text,
   auth_token text,
+  sort_type text, 
   last_seen text,
-  sort_type text
+  username test,
+  picture text
 );
 drop table if exists groups;
 create table groups (
   user_id integer not null,
   group_id integer not null,
   screen_name text,
-  groupname text, 
   picture text,
   added integer, 
   is_old integer
@@ -32,4 +25,10 @@ create table postinfo (
   like integer,
   comm integer,
   repo integer
+);
+drop table if exists screen_size;
+create table screen_size (
+  user_ip text,
+  w integer, 
+  h integer
 );
