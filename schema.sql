@@ -11,6 +11,7 @@ drop table if exists groups;
 create table groups (
   user_id integer not null,
   group_id integer not null,
+  groupname text, 
   screen_name text,
   picture text,
   added integer, 
