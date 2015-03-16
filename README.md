@@ -1,4 +1,4 @@
-<b>VKSMM</b> is a cool way to check the best posts from your groups
+<b>VKSMM</b> is a cool service to get the most popular content from your "vk.com" communities
 <hr>
 <b>How to run:</b>
 
@@ -34,9 +34,8 @@ python
 ```bash
 sudo /etc/init.d/nginx restart
 cd user/vksmmmtool
-screen gunicorn -w 2 -b localhost:8000 server:app
+gunicorn -w 2 -b localhost:8000 server:app --daemon
 ```
-and Control + A + D to leave screen working
 
 <hr>
 <a href="http://vksmm.info/" target="_blank"><b>Check it </b></a> (http://vk.com/  account is required)
