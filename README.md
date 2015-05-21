@@ -36,6 +36,3 @@ sudo /etc/init.d/nginx restart
 cd user/vksmmmtool
 gunicorn -w 2 -b localhost:8000 server:app --daemon
 ```
-
-<hr>
-<a href="http://vksmm.info/" target="_blank"><b>Check it </b></a> (http://vk.com/  account is required)
