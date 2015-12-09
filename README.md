@@ -1,4 +1,7 @@
 <b>VKSMM</b> is a cool service to get the most popular content from your "vk.com" communities
+
+[![Build Status](https://travis-ci.org/d3QUone/vksmmtool.svg?branch=master)](https://travis-ci.org/d3QUone/vksmmtool)
+
 <hr>
 <b>How to run:</b>
 

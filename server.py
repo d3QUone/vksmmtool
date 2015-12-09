@@ -26,14 +26,21 @@ app.config["DEBUG"] = False
 
 
 def wrap_value(value):
-    if isinstance(value, str):
+    if isinstance(value, basestring):
         value = value.replace('"', "&quot;").replace("'", "&#39;")
     return value
 
 
 def unwrap_value(value):
-    if isinstance(value, str):
+    if isinstance(value, basestring):
         value = value.replace("&amp;", "&").replace("&quot;", '"').replace("&#39;", "'")
+    return value
+
+
+def short_value(value, length):
+    if isinstance(value, basestring) and isinstance(length, int):
+        if len(value) >= length and length > 3:
+            value = value[:length-3] + "..."
     return value
 
 
@@ -180,10 +187,7 @@ def index_page():
             group_list = []
             append = group_list.append
             for item in groups:
-                buf_group_name = unwrap_value(item[1])
-                if len(buf_group_name) >= 30:
-                    buf_group_name = buf_group_name[:27] + "..."
-
+                buf_group_name = short_value(unwrap_value(item[1]), 30)
                 append([item[0], buf_group_name, item[2]])
                 if int(item[0]) == int(group_id):
                     current_group_name = unwrap_value(item[1])
@@ -256,9 +260,7 @@ def index_page():
                 append = recommendation.append
                 for item in groups:
                     try:
-                        buf_group_name = unwrap_value(item[1])
-                        if len(buf_group_name) >= 50:
-                            buf_group_name = buf_group_name[:47] + "..."
+                        buf_group_name = short_value(unwrap_value(item[1]), 50)
                         if [item[0], buf_group_name, item[2]] not in recommendation:
                             append([item[0], buf_group_name, item[2]])
                     except Exception:
