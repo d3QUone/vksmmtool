@@ -1,35 +1,47 @@
-drop table if exists userinfo;
-create table userinfo (
-  user_id integer not null,
-  auth_token text,
-  sort_type text, 
-  last_seen text,
-  username test,
-  picture text
+DROP TABLE IF EXISTS `userinfo`;
+CREATE TABLE `userinfo` (
+  `user_id` INTEGER NOT NULL,
+  `auth_token` TEXT,
+  `sort_type` TEXT,
+  `last_seen` TEXT,
+  `username` TEXT,
+  `picture` TEXT,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`user_id`)
 );
-drop table if exists groups;
-create table groups (
-  user_id integer not null,
-  group_id integer not null,
-  groupname text, 
-  screen_name text,
-  picture text,
-  added integer, 
-  is_old integer
+
+DROP TABLE IF EXISTS `groups`;
+CREATE TABLE `groups` (
+  `group_id` INTEGER NOT NULL,
+  `user_id` INTEGER NOT NULL,
+  `groupname` TEXT,
+  `screen_name` TEXT,
+  `picture` TEXT,
+  `added` INTEGER,
+  `is_old` INTEGER,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`group_id`)
 );
-drop table if exists postinfo;
-create table postinfo (
-  group_id integer not null,
-  picture text,
-  content text,
-  link text,
-  like integer,
-  comm integer,
-  repo integer
+
+DROP TABLE IF EXISTS `postinfo`;
+CREATE TABLE `postinfo` (
+  `post_id` INTEGER NOT NULL,
+  `group_id` INTEGER NOT NULL,
+  `picture` TEXT,
+  `content` TEXT,
+  `link` TEXT,
+  `like` INTEGER,
+  `comm` INTEGER,
+  `repo` INTEGER,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`post_id`)
 );
-drop table if exists screen_size;
-create table screen_size (
-  user_ip text,
-  w integer, 
-  h integer
+
+DROP TABLE IF EXISTS `screen_size`;
+CREATE TABLE `screen_size` (
+  `user_ip` TEXT NOT NULL,
+  `w` INTEGER,
+  `h` INTEGER,
+  `is_banned` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`user_ip`)
 );
