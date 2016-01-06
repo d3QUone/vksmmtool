@@ -54,3 +54,4 @@ docs/_build/
 target/
 .idea
 venv
+z_history
