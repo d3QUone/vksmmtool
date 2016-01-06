@@ -1,41 +1,43 @@
 <b>VKSMM</b> is a cool service to get the most popular content from your "vk.com" communities
 
-[![Build Status](https://travis-ci.org/d3QUone/vksmmtool.svg?branch=master)](https://travis-ci.org/d3QUone/vksmmtool)
+Screenshot: 
 
-<hr>
-<b>How to run:</b>
+![Main screen](static/adv_image1.png)
 
-1) Setup all required modules on your server 
+## How to:
 
-2) Create project folders:
-
-\vksmmtool <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\templates <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\static <br>
-
-Don't forget to add graphic files to "\static" folder:<br>
-```
-"none.png", "Comment-Icon-copy.png", "Comment-Icon-sort.png", "Like-Icon-copy.png"
-"Like-Icon-sort.png", "Repost-Icon-copy.png", "Repost-Icon-sort.png"
-```
-
-3) Fill them and setup DB via bash from \vksmmtool-folder:
+1) Setup required modules in virtual environment:
 
 ```bash
-python
-
->>> import server
->>> server.init_db()
+$ virtualenv venv
+$ venv/bin/pip install -r requirements.txt
 ```
 
-4) Run parser in a screen
-
-<code>screen python vkparser.py</code>
-
-5) Setup NGNIX-server and Gunicorn, following  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>, restart it and run app from the project folder, e.g:
+2) Create MySQL database
 
 ```bash
-sudo /etc/init.d/nginx restart
-cd user/vksmmmtool
-gunicorn -w 2 -b localhost:8000 server:app --daemon
+$ mysql -e "create database vksmmdb charset utf8"
 ```
+
+3) Run parser [in a screen]
+
+```bash
+$ screen python vkparser.py
+```
+
+CTRL+A+D to detach the screen, CTRL+C to kill. Actually this is a bad practice but easy to start.
+
+4) Setup NGNIX-server and Gunicorn, following  <a href="https://realpython.com/blog/python/kickstarting-flask-on-ubuntu-setup-and-deployment/">this article</a>, restart it and run app from the project folder, e.g:
+
+```bash
+$ sudo /etc/init.d/nginx restart
+$ cd user/vksmmmtool
+$ gunicorn -w 2 -b localhost:8000 server:app --daemon
+```
+
+This project in my portfolio: [http://vksmm.info/project/4/](http://vksmm.info/project/4/)
+
+## Future steps:
+
+* Write deploy scripts
+* Save nginx, gunicorn and upstart scripts for backend and parser

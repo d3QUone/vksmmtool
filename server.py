@@ -9,6 +9,7 @@ import json
 
 import requests
 from flask import Flask, render_template, url_for, make_response, redirect, jsonify, request
+from logger import Logger
 
 from database import update_query, select_query
 
@@ -21,6 +22,7 @@ CLIENT_ID = "4260316"
 CLIENT_SECRET = "x9Qe9JKVfoTG57LMKUgH"
 
 
+log = Logger("vksmm.backend")
 app = Flask("vksmm")
 app.config["DEBUG"] = False
 
@@ -68,7 +70,7 @@ def login_save_h():
         url = "https://oauth.vk.com/authorize?client_id={}&scope=groups&response_type=code&v=5.27&redirect_uri=http://vksmm.info{}".format(CLIENT_ID, url_for('parse_vk_responce'))
         return redirect(url)
     except Exception:
-        print "/save_h error:\n{}".format(format_exception())
+        log.error("/save_h error:\n{}".format(format_exception()))
         return redirect(url_for('landing_page'))
 
 
@@ -103,10 +105,10 @@ def parse_vk_responce():
                 username = response["name"]
                 picture = response["picture"]  # avatar 100px
             except Exception as e:
-                print "load user-datas: {}".format(e)
+                log.error("load user-datas: {}".format(e))
                 username = " "
                 picture = None
-            print "+ {} online".format(username)
+            log.info("+ {} online".format(username))
 
             # delete old personal data, save new
             # WTF???
@@ -149,12 +151,12 @@ def parse_vk_responce():
                                 (int(user_id), int(item["gid"]), item["screen_name"], item["photo_medium"], int(time.time()), group_name)
                             )
                         except Exception as e:
-                            print repr(e)
+                            log.error(repr(e))
             except Exception:
-                print format_exception()
+                log.error(format_exception())
             return redirect(url_for('index_page', user_id=user_id, access_token=access_token))
         except Exception:
-            print "/vk_login err:\n{}".format(format_exception())
+            log.error("/vk_login err:\n{}".format(format_exception()))
     return redirect(url_for('landing_page'))  # add an error-message here ?
 
 
@@ -226,7 +228,7 @@ def index_page():
                     (user_ip, )
                 )
                 w, h = sizes[0]
-                print "width = {0}, height = {1}; user_ip = {2}".format(w, h, user_ip)
+                log.debug("width = {0}, height = {1}; user_ip = {2}".format(w, h, user_ip))
             try:
                 cols = int((w * 0.8 - 235) / 125)  # x
                 rows = int((h - 120.0) / 120)  # y
@@ -246,10 +248,10 @@ def index_page():
                 try:
                     rlimit = int((h - 300) / 36.0)
                     if rlimit > max_range:
-                        print "big screen :)"
+                        log.debug("big screen :)")
                         rlimit = max_range - 1
                 except Exception as e:
-                    print "rlimit e:", e
+                    log.error("rlimit e:", e)
                     rlimit = 13
                 roffset = int((max_range - rlimit) * random()) + 1
                 groups = select_query(
@@ -264,7 +266,7 @@ def index_page():
                         if [item[0], buf_group_name, item[2]] not in recommendation:
                             append([item[0], buf_group_name, item[2]])
                     except Exception:
-                        print traceback.print_exc()
+                        log.error(traceback.print_exc())
 
             # PAGE-NAVIGATION LINKS
             offset_prev = None
@@ -277,8 +279,7 @@ def index_page():
                 (group_id, )
             )[0][0]
             if count * (offset + 1) < count_postinfo:
-                offset_next = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(
-                    user_id, access_token, group_id, offset + 1)
+                offset_next = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}".format(user_id, access_token, group_id, offset + 1)
 
             base_link = url_for('index_page') + "?user_id={0}&access_token={1}&group_id={2}&offset={3}&sort_type=".format(user_id, access_token, group_id, offset)
 
@@ -301,7 +302,7 @@ def index_page():
                                    stats=stats, group_id=group_id, count_postinfo=count_postinfo, sort_type=sort_type,
                                    recomendation=recommendation)
         except Exception:
-            print "Exception (index_page):\n{}".format(format_exception())
+            log.error("Exception at index_page:\n{}".format(format_exception()))
     return redirect(url_for('landing_page'))
 
 

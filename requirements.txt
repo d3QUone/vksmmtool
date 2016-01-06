@@ -2,3 +2,4 @@ requests
 flask
 pymysql
 pytest
+git+https://github.com/d3QUone/logger
